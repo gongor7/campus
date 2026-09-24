@@ -1,0 +1,12 @@
+{
+  "name": "campus-asfi",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": "22.x"
+  },
+  "devDependencies": {
+    "@types/node": "^22.5.5",
+    "@vercel/node": "^5.0.0"
+  }
+}

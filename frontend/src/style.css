@@ -1,0 +1,91 @@
+:root {
+  --primary: #0f2a4a;
+  --accent: #1a6fb5;
+  --bg: #f4f6f9;
+  --card: #ffffff;
+  --text: #1f2937;
+  --muted: #6b7280;
+  --success: #0e7a4d;
+  --border: #d7dde5;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.container { max-width: 900px; margin: 24px auto; padding: 0 16px; }
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+}
+
+.btn {
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 22px;
+  font-size: 15px;
+  cursor: pointer;
+  text-decoration: none;
+}
+.btn:hover { filter: brightness(1.08); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-secondary { background: #fff; color: var(--accent); border: 1px solid var(--accent); }
+
+.muted { color: var(--muted); }
+
+.indicators {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 12px;
+  margin: 12px 0;
+}
+.indicator {
+  background: #f0f4f9;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+.indicator .name { font-size: 12px; color: var(--muted); }
+.indicator .value { font-size: 20px; font-weight: 600; margin: 2px 0; }
+.indicator .note { font-size: 12px; color: var(--muted); }
+
+.option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin: 8px 0;
+  cursor: pointer;
+  font-size: 15px;
+  font-family: inherit;
+}
+.option:hover { border-color: var(--accent); background: #f2f8fd; }
+
+.progress-bar {
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.progress-bar > div { height: 100%; background: var(--accent); transition: width 0.3s; }
+
+.feedback-panel { border-left: 4px solid var(--accent); }
+.feedback-panel .label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); }
+
+ol.path li { margin-bottom: 14px; }
