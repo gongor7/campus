@@ -11,6 +11,7 @@ import { AppModule } from './app.module';
  */
 async function main() {
   const app = await NestFactory.create(AppModule, { logger: ['error', 'warn', 'log'] });
+  await app.init(); // ejecuta los hooks (seed) — create() solo no los corre
   await app.close();
   process.exit(0);
 }
