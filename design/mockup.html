@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Campus ASFI — Propuesta visual</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #175776;
+    --primary-deep: #1F6E8C;
+    --accent: #2EC4B6;
+    --ink: #10201F;
+    --muted: #5A6B72;
+    --bg: #F4F7F8;
+    --surface: #FFFFFF;
+    --line: #D9E2E6;
+    --success: #1E8E5A;
+    --warning: #B7791F;
+    --danger: #C0392B;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; background: #E8EDEF; color: var(--ink); font-size: 14px; line-height: 1.5; }
+  .page { max-width: 1180px; margin: 0 auto; padding: 28px 20px 80px; }
+
+  /* etiqueta de pantalla en el documento de propuesta */
+  .screen-label { margin: 48px 0 10px; color: var(--muted); font-size: 12px; letter-spacing: 1.2px; text-transform: uppercase; font-weight: 600; }
+  .screen { border-radius: 14px; overflow: hidden; box-shadow: 0 8px 28px rgba(16,32,31,.14); background: var(--bg); border: 1px solid var(--line); }
+
+  /* barra superior institucional */
+  .topbar { display: flex; align-items: center; gap: 16px; background: var(--surface); border-bottom: 1px solid var(--line); padding: 10px 24px; }
+  .topbar .brand { display: flex; align-items: center; gap: 12px; }
+  .topbar .brand img { width: 38px; height: 38px; }
+  .topbar .brand .name { font-weight: 700; font-size: 16px; color: var(--primary); }
+  .topbar .brand .sub { font-size: 11px; color: var(--muted); }
+  .topbar nav { display: flex; gap: 4px; margin-left: 24px; }
+  .topbar nav a { padding: 8px 14px; border-radius: 8px; color: var(--muted); text-decoration: none; font-weight: 500; }
+  .topbar nav a.active { background: #E9F4F7; color: var(--primary); }
+  .topbar .session { margin-left: auto; color: var(--muted); font-size: 13px; }
+
+  .body-pad { padding: 24px; }
+
+  .page-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+  .page-head h1 { font-size: 24px; font-weight: 700; color: var(--primary); }
+  .page-head p { color: var(--muted); margin-top: 2px; }
+
+  .btn { display: inline-flex; align-items: center; gap: 8px; border: none; border-radius: 9px; padding: 9px 18px; font: inherit; font-weight: 600; cursor: pointer; }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-accent { background: var(--accent); color: #06312D; }
+  .btn-ghost { background: transparent; color: var(--primary); border: 1px solid var(--line); }
+  .btn-sm { padding: 6px 12px; font-size: 13px; }
+
+  .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 10px; }
+  .card h3 { font-size: 16px; color: var(--ink); }
+  .card .meta { color: var(--muted); font-size: 13px; display: flex; gap: 10px; flex-wrap: wrap; }
+
+  .chip { display: inline-flex; align-items: center; border-radius: 999px; padding: 3px 11px; font-size: 12px; font-weight: 600; }
+  .chip-draft { background: #EDF1F3; color: var(--muted); }
+  .chip-review { background: #FBF3E4; color: var(--warning); }
+  .chip-published { background: #E5F4EC; color: var(--success); }
+  .chip-level { background: #E9F4F7; color: var(--primary); }
+  .chip-src { background: #E8F8F6; color: #0C6B62; font-weight: 500; }
+
+  .meter { height: 6px; border-radius: 4px; background: #E3EAEC; overflow: hidden; }
+  .meter > div { height: 100%; background: var(--accent); border-radius: 4px; }
+  .meter-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+
+  /* asistente */
+  .steps { display: flex; gap: 8px; margin-bottom: 22px; }
+  .step { flex: 1; text-align: center; padding: 10px 8px; border-radius: 9px; background: var(--surface); border: 1px solid var(--line); color: var(--muted); font-weight: 600; font-size: 13px; }
+  .step.done { color: var(--success); }
+  .step.current { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+  .form-card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 22px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+  .field label { font-weight: 600; font-size: 13px; }
+  .field .hint { color: var(--muted); font-size: 12px; }
+  .field input, .field select, .field textarea { border: 1px solid var(--line); border-radius: 9px; padding: 10px 12px; font: inherit; background: #FBFDFD; color: var(--ink); }
+  .field input:focus, .field select:focus, .field textarea:focus { outline: 2px solid var(--accent); border-color: var(--accent); }
+  .form-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px; }
+
+  /* cuadernos */
+  .opt-card { display: flex; align-items: center; gap: 14px; border: 1.5px solid var(--line); border-radius: 11px; padding: 14px 16px; margin-bottom: 12px; background: #FBFDFD; }
+  .opt-card.selected { border-color: var(--accent); background: #F0FBFA; }
+  .opt-card .radio { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--line); flex: none; }
+  .opt-card.selected .radio { border-color: var(--accent); background: var(--accent); box-shadow: inset 0 0 0 3px #fff; }
+  .opt-card .info { flex: 1; }
+  .opt-card .info b { display: block; }
+  .opt-card .info span { color: var(--muted); font-size: 12.5px; }
+  .dropzone { border: 1.5px dashed var(--line); border-radius: 11px; padding: 26px; text-align: center; color: var(--muted); background: #FBFDFD; }
+  .dropzone b { color: var(--primary); }
+
+  /* estructura propuesta */
+  .summary-bar { display: flex; gap: 18px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 11px; padding: 14px 18px; margin-bottom: 16px; }
+  .summary-bar .stat { font-size: 13px; color: var(--muted); }
+  .summary-bar .stat b { display: block; font-size: 18px; color: var(--ink); }
+  .module { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; margin-bottom: 14px; overflow: hidden; }
+  .module-head { display: flex; align-items: baseline; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--line); background: #F8FBFC; }
+  .module-head h3 { font-size: 15.5px; color: var(--primary); flex: 1; }
+  .module-head .min { color: var(--muted); font-size: 12.5px; }
+  .lesson-row { display: flex; align-items: center; gap: 12px; padding: 10px 18px; border-bottom: 1px solid #EDF2F4; }
+  .lesson-row:last-child { border-bottom: none; }
+  .lesson-row .idx { width: 22px; height: 22px; border-radius: 6px; background: #E9F4F7; color: var(--primary); font-size: 11.5px; font-weight: 700; display: grid; place-items: center; flex: none; }
+  .lesson-row .t { flex: 1; }
+  .lesson-row .t small { color: var(--muted); display: block; }
+  .lesson-row .srcs { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+  .alert-gaps { background: #FDF6EA; border: 1px solid #EAD9B0; border-radius: 11px; padding: 14px 18px; margin-bottom: 16px; }
+  .alert-gaps h4 { color: var(--warning); font-size: 13.5px; margin-bottom: 6px; }
+  .alert-gaps li { color: #7A5B18; font-size: 13px; margin-left: 16px; }
+
+  /* editor de curso */
+  .editor { display: grid; grid-template-columns: 320px 1fr; gap: 16px; }
+  .tree { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+  .tree h4 { color: var(--primary); font-size: 13px; text-transform: uppercase; letter-spacing: .6px; margin-bottom: 10px; }
+  .tree .grp { margin-bottom: 12px; }
+  .tree .grp > b { display: block; font-size: 13px; margin-bottom: 4px; }
+  .tree .item { padding: 7px 10px; border-radius: 8px; color: var(--muted); font-size: 13px; display: flex; justify-content: space-between; }
+  .tree .item.active { background: #E9F4F7; color: var(--primary); font-weight: 600; }
+  .tree .item .m { font-size: 11.5px; color: var(--muted); }
+  .editor-main { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px 22px; }
+  .editor-main h2 { font-size: 18px; margin-bottom: 4px; }
+  .crumb { color: var(--muted); font-size: 12.5px; margin-bottom: 16px; }
+  .editor-main textarea { width: 100%; min-height: 170px; border: 1px solid var(--line); border-radius: 9px; padding: 12px; font: inherit; background: #FBFDFD; resize: vertical; }
+  .statusbar { display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 11px; padding: 10px 16px; margin-bottom: 16px; }
+  .statusbar .st { font-weight: 600; color: var(--muted); }
+
+  /* cuadernos */
+  .doc-row { display: flex; align-items: center; gap: 12px; padding: 11px 16px; border-bottom: 1px solid #EDF2F4; font-size: 13.5px; }
+  .doc-row:last-child { border-bottom: none; }
+  .doc-row .ic { width: 34px; height: 34px; border-radius: 8px; background: #E9F4F7; color: var(--primary); display: grid; place-items: center; font-weight: 700; font-size: 11px; flex: none; }
+  .doc-row .nm { flex: 1; }
+  .doc-row .nm small { color: var(--muted); display: block; }
+  .del { color: var(--danger); background: none; border: none; font: inherit; cursor: pointer; font-size: 12.5px; text-decoration: underline; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="screen-label">Pantalla 1 — Cursos (inicio)</div>
+  <div class="screen">
+    <div class="topbar">
+      <div class="brand">
+        <img src="assets/asfi-logo.png" alt="ASFI">
+        <div>
+          <div class="name">Campus ASFI</div>
+          <div class="sub">Autoridad de Supervisión del Sistema Financiero</div>
+        </div>
+      </div>
+      <nav>
+        <a class="active" href="#">Cursos</a>
+        <a href="#">Cuadernos de fuentes</a>
+        <a href="#">Auditoría</a>
+      </nav>
+      <div class="session">Docente</div>
+    </div>
+    <div class="body-pad">
+      <div class="page-head">
+        <div>
+          <h1>Cursos</h1>
+          <p>Propuestas generadas con IA sobre fuentes oficiales, bajo revisión docente.</p>
+        </div>
+        <button class="btn btn-primary">Nuevo curso</button>
+      </div>
+      <div class="cards">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <h3>Gestión de Riesgos para Entidades de Intermediación</h3>
+            <span class="chip chip-published">Publicado</span>
+          </div>
+          <div class="meta"><span class="chip chip-level">Intermedio</span><span>8 h</span><span>Supervisores de campo</span></div>
+          <div>
+            <div class="meter-row"><span>Lecciones con contenido</span><span>11 / 11</span></div>
+            <div class="meter"><div style="width:100%"></div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <h3>Keycloak para Servicios Institucionales</h3>
+            <span class="chip chip-review">En revisión</span>
+          </div>
+          <div class="meta"><span class="chip chip-level">Básico</span><span>6 h</span><span>Equipo de plataforma</span></div>
+          <div>
+            <div class="meter-row"><span>Lecciones con contenido</span><span>5 / 9</span></div>
+            <div class="meter"><div style="width:55%"></div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <h3>Normativa de Seguros</h3>
+            <span class="chip chip-draft">Borrador</span>
+          </div>
+          <div class="meta"><span class="chip chip-level">Avanzado</span><span>10 h</span><span>Analistas jurídicos</span></div>
+          <div>
+            <div class="meter-row"><span>Estructura propuesta</span><span>pendiente de revisión</span></div>
+            <div class="meter"><div style="width:12%"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen-label">Pantalla 2 — Nuevo curso, paso 1 de 3: datos generales</div>
+  <div class="screen">
+    <div class="topbar">
+      <div class="brand"><img src="assets/asfi-logo.png" alt="ASFI"><div><div class="name">Campus ASFI</div></div></div>
+      <nav><a class="active" href="#">Cursos</a><a href="#">Cuadernos de fuentes</a><a href="#">Auditoría</a></nav>
+    </div>
+    <div class="body-pad">
+      <div class="steps">
+        <div class="step current">1 · Datos del curso</div>
+        <div class="step">2 · Cuaderno de fuentes</div>
+        <div class="step">3 · Estructura propuesta</div>
+      </div>
+      <div class="form-card">
+        <div class="grid-2">
+          <div class="field" style="grid-column:1/-1">
+            <label>Nombre del curso</label>
+            <input value="Keycloak para Servicios Institucionales">
+          </div>
+          <div class="field" style="grid-column:1/-1">
+            <label>Descripción</label>
+            <textarea rows="2">Administración de identidad y acceso con Keycloak en servicios de la ASFI.</textarea>
+          </div>
+          <div class="field" style="grid-column:1/-1">
+            <label>Objetivo general</label>
+            <input value="Instalar, configurar y operar Keycloak como proveedor de identidad institucional.">
+          </div>
+          <div class="field">
+            <label>Público objetivo</label>
+            <input value="Equipo de plataforma tecnológica">
+          </div>
+          <div class="field">
+            <label>Nivel</label>
+            <select><option>Básico</option><option selected>Intermedio</option><option>Avanzado</option></select>
+          </div>
+          <div class="field">
+            <label>Duración objetivo (horas)</label>
+            <input value="6">
+            <span class="hint">La estructura propuesta repartirá estos tiempos entre lecciones.</span>
+          </div>
+          <div class="field">
+            <label>Plantilla institucional</label>
+            <input value="ASFI_STANDARD" disabled>
+            <span class="hint">Definida por la institución; la IA trabaja dentro de ella.</span>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-ghost">Cancelar</button>
+          <button class="btn btn-primary">Continuar al cuaderno</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen-label">Pantalla 3 — Paso 2: vincular cuaderno de fuentes</div>
+  <div class="screen">
+    <div class="topbar">
+      <div class="brand"><img src="assets/asfi-logo.png" alt="ASFI"><div><div class="name">Campus ASFI</div></div></div>
+      <nav><a class="active" href="#">Cursos</a><a href="#">Cuadernos de fuentes</a><a href="#">Auditoría</a></nav>
+    </div>
+    <div class="body-pad">
+      <div class="steps">
+        <div class="step done">1 · Datos del curso</div>
+        <div class="step current">2 · Cuaderno de fuentes</div>
+        <div class="step">3 · Estructura propuesta</div>
+      </div>
+      <div class="form-card">
+        <div class="field"><label>Selecciona el cuaderno con el material oficial del curso</label></div>
+        <div class="opt-card selected">
+          <div class="radio"></div>
+          <div class="info"><b>Keycloak — documentación oficial</b><span>5 fuentes · PDF y PPTX · actualizado el 18-09-2026</span></div>
+          <span class="chip chip-src">Seleccionado</span>
+        </div>
+        <div class="opt-card">
+          <div class="radio"></div>
+          <div class="info"><b>Gestión de Riesgos ASFI</b><span>4 fuentes · PDF · actualizado el 02-08-2026</span></div>
+        </div>
+        <div class="opt-card">
+          <div class="radio"></div>
+          <div class="info"><b>Normativa de Seguros</b><span>7 fuentes · PDF y DOCX · actualizado el 11-07-2026</span></div>
+        </div>
+        <div class="dropzone" style="margin-top:16px">
+          <b>Crear un cuaderno nuevo</b> — arrastra aquí los documentos oficiales (PDF, PPTX, DOCX, TXT; hasta 20 MB por archivo)
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-ghost">Atrás</button>
+          <button class="btn btn-accent">Proponer estructura con IA</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen-label">Pantalla 4 — Paso 3: estructura propuesta por IA (editable)</div>
+  <div class="screen">
+    <div class="topbar">
+      <div class="brand"><img src="assets/asfi-logo.png" alt="ASFI"><div><div class="name">Campus ASFI</div></div></div>
+      <nav><a class="active" href="#">Cursos</a><a href="#">Cuadernos de fuentes</a><a href="#">Auditoría</a></nav>
+    </div>
+    <div class="body-pad">
+      <div class="steps">
+        <div class="step done">1 · Datos del curso</div>
+        <div class="step done">2 · Cuaderno de fuentes</div>
+        <div class="step current">3 · Estructura propuesta</div>
+      </div>
+
+      <div class="summary-bar">
+        <div class="stat"><b>3 módulos</b>plantilla ASFI_STANDARD</div>
+        <div class="stat"><b>9 lecciones</b>2 a 4 por módulo</div>
+        <div class="stat"><b>6 h 00 m</b>objetivo: 6 h</div>
+        <div class="stat"><b>5 fuentes</b>citadas por módulo</div>
+        <div style="margin-left:auto;display:flex;gap:8px">
+          <button class="btn btn-ghost btn-sm">Regenerar estructura</button>
+          <button class="btn btn-primary btn-sm">Guardar y generar contenido</button>
+        </div>
+      </div>
+
+      <div class="alert-gaps">
+        <h4>Brechas de cobertura detectadas en las fuentes</h4>
+        <ul>
+          <li>Integración de Keycloak con LDAP institucional: no tratada en los documentos del cuaderno. Considera agregar una fuente antes de generar contenido.</li>
+        </ul>
+      </div>
+
+      <div class="module">
+        <div class="module-head"><h3>Módulo 1 · Fundamentos de identidad y acceso</h3><span class="min">110 min</span></div>
+        <div class="lesson-row"><div class="idx">1</div><div class="t">Conceptos de identidad, autenticación y autorización<small>Objetivo: distinguir los componentes de una solución IAM</small></div><div class="srcs"><span class="chip chip-src">keycloak-docs.pdf</span><span class="m" style="color:var(--muted);font-size:12px">30 min</span></div></div>
+        <div class="lesson-row"><div class="idx">2</div><div class="t">Arquitectura de Keycloak: reinos, clientes y roles<small>Objetivo: describir la arquitectura y sus componentes</small></div><div class="srcs"><span class="chip chip-src">keycloak-docs.pdf</span><span class="chip chip-src">guia-instalacion.pdf</span><span style="color:var(--muted);font-size:12px">40 min</span></div></div>
+        <div class="lesson-row"><div class="idx">3</div><div class="t">Despliegue institucional: requisitos y decisiones<small>Objetivo: planificar un despliegue en la ASFI</small></div><div class="srcs"><span class="chip chip-src">guia-instalacion.pdf</span><span style="color:var(--muted);font-size:12px">40 min</span></div></div>
+      </div>
+
+      <div class="module">
+        <div class="module-head"><h3>Módulo 2 · Configuración de reinos y clientes</h3><span class="min">140 min</span></div>
+        <div class="lesson-row"><div class="idx">1</div><div class="t">Creación de reinos y configuración de tokens</div><div class="srcs"><span class="chip chip-src">keycloak-docs.pdf</span><span style="color:var(--muted);font-size:12px">45 min</span></div></div>
+        <div class="lesson-row"><div class="idx">2</div><div class="t">Clientes y aplicaciones protegidas</div><div class="srcs"><span class="chip chip-src">keycloak-docs.pdf</span><span class="chip chip-src">presentacion-curso.pptx</span><span style="color:var(--muted);font-size:12px">45 min</span></div></div>
+        <div class="lesson-row"><div class="idx">3</div><div class="t">Roles, grupos y permisos institucionales</div><div class="srcs"><span class="chip chip-src">keycloak-docs.pdf</span><span style="color:var(--muted);font-size:12px">50 min</span></div></div>
+      </div>
+
+      <div class="module">
+        <div class="module-head"><h3>Módulo 3 · Operación y buenas prácticas</h3><span class="min">110 min</span></div>
+        <div class="lesson-row"><div class="idx">1</div><div class="t">Respaldo, actualización y monitoreo</div><div class="srcs"><span class="chip chip-src">guia-operacion.pdf</span><span style="color:var(--muted);font-size:12px">40 min</span></div></div>
+        <div class="lesson-row"><div class="idx">2</div><div class="t">Seguridad del proveedor de identidad</div><div class="srcs"><span class="chip chip-src">guia-operacion.pdf</span><span class="chip chip-src">checklist-seguridad.pdf</span><span style="color:var(--muted);font-size:12px">40 min</span></div></div>
+        <div class="lesson-row"><div class="idx">3</div><div class="t">Práctica guiada: caso institucional</div><div class="srcs"><span class="chip chip-src">presentacion-curso.pptx</span><span style="color:var(--muted);font-size:12px">30 min</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen-label">Pantalla 5 — Editor de curso (revisión y edición docente)</div>
+  <div class="screen">
+    <div class="topbar">
+      <div class="brand"><img src="assets/asfi-logo.png" alt="ASFI"><div><div class="name">Campus ASFI</div></div></div>
+      <nav><a class="active" href="#">Cursos</a><a href="#">Cuadernos de fuentes</a><a href="#">Auditoría</a></nav>
+      <div class="session">Docente</div>
+    </div>
+    <div class="body-pad">
+      <div class="statusbar">
+        <span class="st">Keycloak para Servicios Institucionales</span>
+        <span class="chip chip-review">En revisión</span>
+        <span style="color:var(--muted);font-size:13px">Generado con Gemini · plantilla ASFI_STANDARD · cuaderno: Keycloak</span>
+        <div style="margin-left:auto;display:flex;gap:8px">
+          <button class="btn btn-ghost btn-sm">Archivar</button>
+          <button class="btn btn-primary btn-sm">Aprobar y publicar</button>
+        </div>
+      </div>
+      <div class="editor">
+        <div class="tree">
+          <h4>Estructura</h4>
+          <div class="grp">
+            <b>Introducción</b>
+            <div class="item"><span>Bienvenida y alcance</span><span class="m">10 m</span></div>
+          </div>
+          <div class="grp">
+            <b>Módulo 1 · Fundamentos</b>
+            <div class="item"><span>1. Conceptos IAM</span><span class="m">30 m</span></div>
+            <div class="item active"><span>2. Arquitectura de Keycloak</span><span class="m">40 m</span></div>
+            <div class="item"><span>3. Despliegue institucional</span><span class="m">40 m</span></div>
+          </div>
+          <div class="grp">
+            <b>Módulo 2 · Configuración</b>
+            <div class="item"><span>1. Reinos y tokens</span><span class="m">45 m</span></div>
+            <div class="item"><span>2. Clientes protegidos</span><span class="m">45 m</span></div>
+            <div class="item"><span>3. Roles y permisos</span><span class="m">50 m</span></div>
+          </div>
+          <div class="grp">
+            <b>Práctica</b>
+            <div class="item"><span>Caso institucional</span><span class="m">30 m</span></div>
+            <b style="margin-top:8px">Evaluación</b>
+            <div class="item"><span>Examen del curso</span><span class="m">—</span></div>
+            <b style="margin-top:8px">Cierre</b>
+            <div class="item"><span>Síntesis y siguientes pasos</span><span class="m">—</span></div>
+          </div>
+        </div>
+        <div class="editor-main">
+          <div class="crumb">Módulo 1 · Lección 2 de 3</div>
+          <h2>Arquitectura de Keycloak: reinos, clientes y roles</h2>
+          <div class="field" style="margin-top:14px">
+            <label>Objetivo de la lección</label>
+            <input value="Describir la arquitectura de Keycloak y la función de reinos, clientes y roles.">
+          </div>
+          <div class="field">
+            <label>Contenido</label>
+            <textarea>Un reino (realm) administra un conjunto de usuarios, credenciales, roles y grupos. En la arquitectura institucional se recomienda un reino por cada línea de servicios con políticas de acceso diferenciadas…</textarea>
+          </div>
+          <div class="field">
+            <label>Fuentes citadas en esta lección</label>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <span class="chip chip-src">keycloak-docs.pdf</span>
+              <span class="chip chip-src">guia-instalacion.pdf</span>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-ghost">Regenerar esta lección</button>
+            <button class="btn btn-primary">Guardar cambios</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen-label">Pantalla 6 — Cuadernos de fuentes</div>
+  <div class="screen">
+    <div class="topbar">
+      <div class="brand"><img src="assets/asfi-logo.png" alt="ASFI"><div><div class="name">Campus ASFI</div></div></div>
+      <nav><a href="#">Cursos</a><a class="active" href="#">Cuadernos de fuentes</a><a href="#">Auditoría</a></nav>
+      <div class="session">Docente</div>
+    </div>
+    <div class="body-pad">
+      <div class="page-head">
+        <div><h1>Cuadernos de fuentes</h1><p>Material oficial reutilizable entre cursos. La IA genera únicamente con el contexto del cuaderno vinculado.</p></div>
+        <button class="btn btn-primary">Nuevo cuaderno</button>
+      </div>
+      <div class="cards" style="grid-template-columns:1fr 1fr">
+        <div class="card" style="gap:0;padding:0">
+          <div style="padding:16px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center">
+            <b>Keycloak — documentación oficial</b>
+            <span class="chip chip-src">2 cursos vinculados</span>
+          </div>
+          <div class="doc-row"><div class="ic">PDF</div><div class="nm">keycloak-docs.pdf<small>4,2 MB · subido el 18-09-2026</small></div><button class="del">Quitar</button></div>
+          <div class="doc-row"><div class="ic">PDF</div><div class="nm">guia-instalacion.pdf<small>1,1 MB · subido el 18-09-2026</small></div><button class="del">Quitar</button></div>
+          <div class="doc-row"><div class="ic">PDF</div><div class="nm">guia-operacion.pdf<small>0,9 MB · subido el 18-09-2026</small></div><button class="del">Quitar</button></div>
+          <div class="doc-row"><div class="ic">PPTX</div><div class="nm">presentacion-curso.pptx<small>6,4 MB · subido el 18-09-2026</small></div><button class="del">Quitar</button></div>
+          <div class="doc-row"><div class="ic">PDF</div><div class="nm">checklist-seguridad.pdf<small>0,3 MB · subido el 18-09-2026</small></div><button class="del">Quitar</button></div>
+          <div style="padding:12px 18px"><button class="btn btn-ghost btn-sm">Agregar fuentes</button></div>
+        </div>
+        <div class="card" style="gap:0;padding:0">
+          <div style="padding:16px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center">
+            <b>Gestión de Riesgos ASFI</b>
+            <span class="chip chip-src">1 curso vinculado</span>
+          </div>
+          <div class="doc-row"><div class="ic">PDF</div><div class="nm">ley-393.pdf<small>2,8 MB · subido el 02-08-2026</small></div><button class="del">Quitar</button></div>
+          <div class="doc-row"><div class="ic">PDF</div><div class="nm">manual-gestion-riesgos.pdf<small>5,1 MB · subido el 02-08-2026</small></div><button class="del">Quitar</button></div>
+          <div class="doc-row"><div class="ic">DOCX</div><div class="nm">reglamento-interno.docx<small>0,7 MB · subido el 02-08-2026</small></div><button class="del">Quitar</button></div>
+          <div style="padding:12px 18px"><button class="btn btn-ghost btn-sm">Agregar fuentes</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
