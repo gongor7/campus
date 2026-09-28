@@ -1,7 +1,5 @@
 node_modules/
 dist/
-# backend/dist debe subirse a Vercel: la función serverless (api/[...path].ts) lo importa
-!backend/dist/
 coverage/
 *.tsbuildinfo
 .env
