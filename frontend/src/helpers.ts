@@ -39,3 +39,17 @@ export function formatBytes(bytes: number): string {
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
+
+export function formatCooldown(ms: number): string {
+  if (ms <= 0) return 'disponible';
+  const totalSeconds = Math.ceil(ms / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  if (minutes === 0) return `${seconds} s`;
+  return `${minutes} min ${seconds.toString().padStart(2, '0')} s`;
+}
+
+export const ENROLLMENT_LABELS: Record<string, string> = {
+  IN_PROGRESS: 'En curso',
+  COMPLETED: 'Completado',
+};

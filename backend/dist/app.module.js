@@ -18,6 +18,9 @@ const courses_module_1 = require("./courses/courses.module");
 const generation_module_1 = require("./generation/generation.module");
 const publication_module_1 = require("./publication/publication.module");
 const students_module_1 = require("./students/students.module");
+const enrollments_module_1 = require("./enrollments/enrollments.module");
+const question_banks_module_1 = require("./question-banks/question-banks.module");
+const attempts_module_1 = require("./attempts/attempts.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -57,6 +60,9 @@ exports.AppModule = AppModule = __decorate([
             generation_module_1.GenerationModule,
             publication_module_1.PublicationModule,
             students_module_1.StudentsModule,
+            enrollments_module_1.EnrollmentsModule,
+            question_banks_module_1.QuestionBanksModule,
+            attempts_module_1.AttemptsModule,
         ],
     })
 ], AppModule);

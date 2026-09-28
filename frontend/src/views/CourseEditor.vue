@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import { api, type Course, type Lesson, type CourseSection } from '../api';
+import { api, bankApi, type Course, type Lesson, type CourseSection, type QuestionBank } from '../api';
 import { STATUS_LABELS, statusClass, formatHours } from '../helpers';
 
 const route = useRoute();
@@ -34,6 +34,7 @@ onMounted(async () => {
     await reload();
     const first = allLessons.value[0];
     if (first) selected.value = { kind: 'lesson', id: first.id };
+    await loadBank();
   } catch (e) {
     error.value = (e as Error).message;
   }
@@ -121,6 +122,65 @@ function submitReview() {
 
 function publish() {
   void run(() => api.publish(courseId), 'Curso publicado.');
+}
+
+// --- Banco de preguntas (RF-14 a RF-17) ---
+const bank = ref<QuestionBank | null>(null);
+const newQuestion = ref({ caseText: '', prompt: '', expectedConcepts: '', sourceRefs: '' });
+
+async function loadBank() {
+  try {
+    bank.value = await bankApi.findByCourse(courseId);
+  } catch {
+    bank.value = null;
+  }
+}
+
+async function generateBank() {
+  error.value = null;
+  busy.value = true;
+  try {
+    bank.value = await bankApi.generate(courseId);
+    notice.value = 'Banco generado a partir del contenido y las fuentes del curso.';
+  } catch (e) {
+    error.value = (e as Error).message;
+  } finally {
+    busy.value = false;
+  }
+}
+
+async function approveBank() {
+  await run(async () => {
+    bank.value = await bankApi.approve(courseId);
+  }, 'Banco aprobado: el curso ya puede publicarse.');
+}
+
+async function saveQuestion(id: number, field: 'caseText' | 'prompt', event: Event) {
+  const value = (event.target as HTMLTextAreaElement).value;
+  await run(async () => {
+    await bankApi.update(id, { [field]: value });
+    await loadBank();
+  }, 'Pregunta actualizada.');
+}
+
+async function removeQuestion(id: number) {
+  await run(async () => {
+    await bankApi.remove(id);
+    await loadBank();
+  }, 'Pregunta eliminada.');
+}
+
+async function addQuestion() {
+  await run(async () => {
+    await bankApi.add(courseId, {
+      caseText: newQuestion.value.caseText,
+      prompt: newQuestion.value.prompt,
+      expectedConcepts: newQuestion.value.expectedConcepts.split(',').map((s) => s.trim()).filter(Boolean),
+      sourceRefs: newQuestion.value.sourceRefs.split(',').map((s) => s.trim()).filter(Boolean),
+    });
+    newQuestion.value = { caseText: '', prompt: '', expectedConcepts: '', sourceRefs: '' };
+    await loadBank();
+  }, 'Pregunta agregada.');
 }
 </script>
 
@@ -237,6 +297,74 @@ function publish() {
         </template>
 
         <p v-else class="empty">Selecciona una lección o sección del árbol.</p>
+      </div>
+    </div>
+
+    <!-- Banco de preguntas (RF-14 a RF-17): la IA propone, el docente decide. -->
+    <div v-if="editable" class="form-card" style="margin-top:18px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap">
+        <h2 style="font-size:16px;color:var(--primary)">Banco de preguntas de la evaluación</h2>
+        <span v-if="bank" class="chip" :class="bank.status === 'APPROVED' ? 'chip-published' : 'chip-draft'">
+          {{ bank.status === 'APPROVED' ? 'Aprobado' : 'Borrador' }}
+        </span>
+        <div style="margin-left:auto;display:flex;gap:8px">
+          <button class="btn btn-ghost btn-sm" :disabled="busy" @click="generateBank">
+            {{ bank ? 'Regenerar banco' : 'Generar con IA' }}
+          </button>
+          <button v-if="bank && bank.questions.length > 0" class="btn btn-primary btn-sm" :disabled="busy || bank.status === 'APPROVED'" @click="approveBank">
+            Aprobar banco
+          </button>
+        </div>
+      </div>
+      <p class="muted" style="margin-bottom:12px">
+        Preguntas de caso con respuesta abierta generadas desde el contenido y las fuentes; edítalas antes de aprobar.
+        Editar un banco aprobado lo devuelve a borrador.
+      </p>
+
+      <p v-if="!bank" class="empty">Sin banco todavía: genera la propuesta con IA o agrega preguntas manualmente.</p>
+
+      <div v-for="(q, i) in bank?.questions ?? []" :key="q.id" class="module">
+        <div class="module-head">
+          <h3>Pregunta {{ i + 1 }}</h3>
+          <button class="link-danger" :disabled="busy" @click="removeQuestion(q.id)">Eliminar</button>
+        </div>
+        <div style="padding:12px 18px">
+          <div class="field">
+            <label>Caso</label>
+            <textarea :value="q.caseText" rows="2" @change="saveQuestion(q.id, 'caseText', $event)" />
+          </div>
+          <div class="field" style="margin-bottom:0">
+            <label>Pregunta</label>
+            <textarea :value="q.prompt" rows="2" @change="saveQuestion(q.id, 'prompt', $event)" />
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+            <span v-for="c in q.expectedConcepts" :key="c" class="chip chip-src">{{ c }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-top:14px">
+        <div class="field" style="grid-column:1/-1">
+          <label>Agregar pregunta manual — caso</label>
+          <textarea v-model="newQuestion.caseText" rows="2" />
+        </div>
+        <div class="field" style="grid-column:1/-1">
+          <label>Pregunta</label>
+          <input v-model="newQuestion.prompt" />
+        </div>
+        <div class="field">
+          <label>Conceptos esperados (separados por coma)</label>
+          <input v-model="newQuestion.expectedConcepts" />
+        </div>
+        <div class="field">
+          <label>Fuentes (separadas por coma)</label>
+          <input v-model="newQuestion.sourceRefs" />
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-ghost" :disabled="busy || newQuestion.caseText.trim().length < 10 || newQuestion.prompt.trim().length < 5" @click="addQuestion">
+          Agregar pregunta
+        </button>
       </div>
     </div>
   </template>

@@ -3,11 +3,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CourseEntity } from '../courses/course.entity';
 import { AuditService } from '../audit/audit.service';
+import { QuestionBanksService } from '../question-banks/question-banks.service';
+import { SourcesService } from '../sources/sources.service';
 
 /**
- * Transiciones de estado del flujo editorial (SPEC-publication):
- * DRAFT -> REVIEW -> PUBLISHED -> ARCHIVED. Nunca se publica una propuesta
- * de IA sin revision docente, y solo con la estructura y el contenido completos.
+ * Transiciones de estado del flujo editorial (SPEC-publication + enmienda):
+ * DRAFT -> REVIEW -> PUBLISHED -> ARCHIVED. Publicar exige revision docente,
+ * contenido completo, banco de preguntas aprobado y cuaderno con fuentes (RF-18).
  */
 @Injectable()
 export class PublicationService {
@@ -15,6 +17,8 @@ export class PublicationService {
     @InjectRepository(CourseEntity)
     private readonly courses: Repository<CourseEntity>,
     private readonly audit: AuditService,
+    private readonly banks: QuestionBanksService,
+    private readonly sources: SourcesService,
   ) {}
 
   async submitReview(courseId: number): Promise<CourseEntity> {
@@ -35,10 +39,22 @@ export class PublicationService {
         `No se puede publicar desde el estado ${course.status}: el curso debe estar en revision (aprobacion docente previa)`,
       );
     }
+
     const problems = this.completenessProblems(course);
-    if (problems.length > 0) {
-      throw new BadRequestException(problems);
+    const approvedQuestions = await this.banks.approvedBankWithQuestions(courseId);
+    if (approvedQuestions.length === 0) {
+      problems.push('Falta el banco de preguntas aprobado: generelo, reviselo y aprobelo antes de publicar (RF-18).');
     }
+    if (!course.sourceSetId) {
+      problems.push('El curso necesita un cuaderno de fuentes con al menos una fuente para publicarse.');
+    } else {
+      const set = await this.sources.findSet(course.sourceSetId);
+      if (set.sources.length === 0) {
+        problems.push('El cuaderno del curso no tiene fuentes cargadas; agregue al menos una.');
+      }
+    }
+    if (problems.length > 0) throw new BadRequestException(problems);
+
     course.status = 'PUBLISHED';
     const saved = await this.courses.save(course);
     await this.audit.log({ action: 'COURSE_PUBLISHED', resourceType: 'COURSE', resourceId: courseId });

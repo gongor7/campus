@@ -1,6 +1,6 @@
 import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
 
-export type GenerationPhase = 'OUTLINE' | 'LESSON';
+export type GenerationPhase = 'OUTLINE' | 'LESSON' | 'QUESTIONS' | 'GRADING';
 export type GenerationStatus = 'SUCCESS' | 'ERROR';
 
 /**

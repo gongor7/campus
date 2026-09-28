@@ -6,6 +6,7 @@ import { GenerationService } from './generation.service';
 import { GenerationController } from './generation.controller';
 import { MockProvider } from './mock.provider';
 import { GeminiProvider } from './gemini.provider';
+import { AiProviderService } from './ai-provider.service';
 import { CoursesModule } from '../courses/courses.module';
 import { SourcesModule } from '../sources/sources.module';
 import { TemplatesModule } from '../templates/templates.module';
@@ -19,7 +20,8 @@ import { AuditModule } from '../audit/audit.module';
     TemplatesModule,
     AuditModule,
   ],
-  providers: [GenerationService, MockProvider, GeminiProvider],
+  providers: [GenerationService, MockProvider, GeminiProvider, AiProviderService],
   controllers: [GenerationController],
+  exports: [AiProviderService],
 })
 export class GenerationModule {}

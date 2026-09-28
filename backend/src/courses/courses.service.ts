@@ -123,8 +123,13 @@ export class CoursesService {
     return saved;
   }
 
+  /** Archivar procede desde DRAFT, REVIEW o PUBLISHED; nunca dos veces (RF-29). */
   async archive(id: number): Promise<CourseEntity> {
-    const course = await this.findEditable(id);
+    const course = await this.courses.findOne({ where: { id } });
+    if (!course) throw new NotFoundException('Curso no encontrado');
+    if (course.status === 'ARCHIVED') {
+      throw new BadRequestException('El curso ya esta archivado');
+    }
     course.status = 'ARCHIVED';
     const saved = await this.courses.save(course);
     await this.audit.log({ action: 'COURSE_ARCHIVED', resourceType: 'COURSE', resourceId: id });

@@ -58,6 +58,72 @@ let MockProvider = class MockProvider {
             sourceRefs: filenames.slice(0, 2),
         };
     }
+    async generateQuestionBank(input) {
+        const lessons = input.lessons.length > 0 ? input.lessons : [{ title: 'Conceptos del curso', content: null, sourceRefs: null }];
+        const questions = [];
+        for (let i = 0; i < Math.max(6, Math.min(lessons.length, 8)); i++) {
+            const lesson = lessons[i % lessons.length];
+            const sourceRefs = (lesson.sourceRefs ?? input.sources.map((s) => s.filename)).slice(0, 2);
+            questions.push({
+                caseText: `Caso institucional: en una entidad del sistema financiero supervisada por la ASFI se presenta una ` +
+                    `situacion relacionada con ${lesson.title.toLowerCase()}. El estudiante debe analizar el caso concreto ` +
+                    `y fundamentar su respuesta en el material oficial del curso.`,
+                prompt: `Analiza el caso y explica como se aplica ${lesson.title}, citando el sustento del material del curso.`,
+                expectedConcepts: [lesson.title, 'material del curso', 'aplicacion'],
+                sourceRefs: sourceRefs.length > 0 ? sourceRefs : ['material del curso'],
+                variationTemplate: {
+                    variableAspects: ['entidad', 'monto', 'plazo', 'situacion'],
+                    constraints: 'El concepto evaluado y el nivel de dificultad se mantienen identicos.',
+                },
+            });
+        }
+        return { questions };
+    }
+    async generateVariants(input) {
+        return {
+            variants: input.questions.map((q) => ({
+                questionId: q.id,
+                caseText: `${q.caseText} [Variante ${input.seed.slice(0, 8)}: entidad, monto y plazo ajustados dentro de la plantilla aprobada]`,
+            })),
+        };
+    }
+    async gradeAnswer(input) {
+        const answer = (input.answer ?? '').trim();
+        if (answer.includes('[FALLA_PROVEEDOR]')) {
+            throw new Error('proveedor de IA no disponible (simulado)');
+        }
+        if (answer.length === 0) {
+            return { score: 0, sustained: false, feedback: 'La respuesta esta vacia. Desarrolla tu analisis del caso.' };
+        }
+        const reference = input.question.sourceRefs[0] ?? 'material del curso';
+        const genericMarker = answer.includes('[GENERICA]');
+        if (genericMarker) {
+            return {
+                score: 40,
+                sustained: false,
+                feedback: 'La respuesta es correcta en terminos generales pero no se sustenta en el material del curso, ' +
+                    `por lo que su puntaje queda por debajo del minimo de sustento. Referencia para profundizar: ${reference}.`,
+            };
+        }
+        const concepts = input.question.expectedConcepts;
+        const matched = concepts.filter((c) => answer.toLowerCase().includes(c.toLowerCase()));
+        const half = Math.ceil(concepts.length / 2);
+        const sustained = matched.length >= half;
+        let score;
+        if (matched.length === concepts.length)
+            score = 100;
+        else if (sustained)
+            score = 80;
+        else if (matched.length > 0)
+            score = 55;
+        else
+            score = 25;
+        const missing = concepts.filter((c) => !matched.includes(c));
+        const feedback = `Conceptos cubiertos: ${matched.length === 0 ? 'ninguno' : matched.join(', ')}. ` +
+            (missing.length > 0 ? `Conceptos faltantes: ${missing.join(', ')}. ` : '') +
+            `Referencia del curso que desarrolla la respuesta: ${reference}.`;
+        return { score, sustained, feedback };
+    }
 };
 exports.MockProvider = MockProvider;
 exports.MockProvider = MockProvider = __decorate([

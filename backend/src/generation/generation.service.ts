@@ -1,11 +1,8 @@
 import { BadGatewayException, BadRequestException, Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CourseGenerationEntity } from './course-generation.entity';
-import { AIProvider, LessonContent, OutlineProposal } from './ai-provider';
-import { MockProvider } from './mock.provider';
-import { GeminiProvider } from './gemini.provider';
+import { LessonContent, OutlineProposal } from './ai-provider';
 import { CoursesService } from '../courses/courses.service';
 import { SourcesService } from '../sources/sources.service';
 import { StorageService, StoredFile } from '../sources/storage.service';
@@ -14,6 +11,7 @@ import { TemplateValidatorService } from '../templates/template-validator.servic
 import { AuditService } from '../audit/audit.service';
 import { LessonEntity } from '../courses/lesson.entity';
 import { ReplaceOutlineDto } from '../courses/dto';
+import { AiProviderService } from './ai-provider.service';
 
 /**
  * Orquesta las dos fases de generacion (decision D7):
@@ -22,8 +20,6 @@ import { ReplaceOutlineDto } from '../courses/dto';
  */
 @Injectable()
 export class GenerationService {
-  private readonly provider: AIProvider;
-
   constructor(
     @InjectRepository(CourseGenerationEntity)
     private readonly generations: Repository<CourseGenerationEntity>,
@@ -35,14 +31,8 @@ export class GenerationService {
     private readonly templates: TemplatesService,
     private readonly validator: TemplateValidatorService,
     private readonly audit: AuditService,
-    mock: MockProvider,
-    gemini: GeminiProvider,
-    config: ConfigService,
-  ) {
-    const preferred = config.get<string>('AI_PROVIDER', 'gemini');
-    const hasKey = Boolean(config.get<string>('GEMINI_API_KEY'));
-    this.provider = preferred === 'mock' || !hasKey ? mock : gemini;
-  }
+    private readonly ai: AiProviderService,
+  ) {}
 
   async generateOutline(courseId: number): Promise<OutlineProposal> {
     const course = await this.courses.findById(courseId);
@@ -54,7 +44,7 @@ export class GenerationService {
     try {
       const files = await this.sources.readSetFiles(course.sourceSetId);
       const template = course.template ?? (await this.templates.findById(course.templateId));
-      const proposal = await this.provider.generateOutline({
+      const proposal = await this.ai.provider.generateOutline({
         course: this.courseContext(course),
         templateSections: template.sections,
         sources: files,
@@ -75,7 +65,7 @@ export class GenerationService {
       }
 
       await this.trace(courseId, 'OUTLINE', null, started, 'SUCCESS', {
-        provider: this.provider.name,
+        provider: this.ai.provider.name,
         sources: files.length,
         modules: proposal.modules.length,
       });
@@ -83,7 +73,7 @@ export class GenerationService {
         action: 'GENERATION_OUTLINE',
         resourceType: 'COURSE',
         resourceId: courseId,
-        detail: { provider: this.provider.name, modules: proposal.modules.length },
+        detail: { provider: this.ai.provider.name, modules: proposal.modules.length },
       });
 
       // La propuesta se persiste como estructura del curso (editable por el docente).
@@ -91,7 +81,7 @@ export class GenerationService {
       return proposal;
     } catch (error) {
       await this.trace(courseId, 'OUTLINE', null, started, 'ERROR', {
-        provider: this.provider.name,
+        provider: this.ai.provider.name,
         message: (error as Error).message,
       });
       throw error;
@@ -124,7 +114,7 @@ export class GenerationService {
         }
       }
 
-      const content = await this.provider.generateLessonContent({
+      const content = await this.ai.provider.generateLessonContent({
         course: this.courseContext(course),
         moduleTitle: module.title,
         moduleObjective: module.objective ?? '',
@@ -139,20 +129,20 @@ export class GenerationService {
       });
 
       await this.trace(course.id, 'LESSON', lessonId, started, 'SUCCESS', {
-        provider: this.provider.name,
+        provider: this.ai.provider.name,
         sources: files.length,
       });
       await this.audit.log({
         action: 'GENERATION_LESSON',
         resourceType: 'LESSON',
         resourceId: lessonId,
-        detail: { courseId: course.id, provider: this.provider.name },
+        detail: { courseId: course.id, provider: this.ai.provider.name },
       });
 
       return content;
     } catch (error) {
       await this.trace(course.id, 'LESSON', lessonId, started, 'ERROR', {
-        provider: this.provider.name,
+        provider: this.ai.provider.name,
         message: (error as Error).message,
       });
       throw error;
@@ -216,8 +206,8 @@ export class GenerationService {
         courseId,
         phase,
         lessonId,
-        provider: this.provider.name,
-        model: this.provider.model,
+        provider: this.ai.provider.name,
+        model: this.ai.provider.model,
         status,
         durationMs: Date.now() - started,
         inputSummary: summary,

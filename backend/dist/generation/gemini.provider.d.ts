@@ -1,5 +1,5 @@
 import { ConfigService } from '@nestjs/config';
-import { AIProvider, LessonContent, LessonInput, OutlineInput, OutlineProposal } from './ai-provider';
+import { AIProvider, BankInput, GradeInput, GradeOutput, LessonContent, LessonInput, OutlineInput, OutlineProposal, QuestionDraft, VariantInput, VariantOutput } from './ai-provider';
 export declare class GeminiProvider implements AIProvider {
     private readonly config;
     private readonly logger;
@@ -8,6 +8,11 @@ export declare class GeminiProvider implements AIProvider {
     get model(): string;
     generateOutline(input: OutlineInput): Promise<OutlineProposal>;
     generateLessonContent(input: LessonInput): Promise<LessonContent>;
+    generateQuestionBank(input: BankInput): Promise<{
+        questions: QuestionDraft[];
+    }>;
+    generateVariants(input: VariantInput): Promise<VariantOutput>;
+    gradeAnswer(input: GradeInput): Promise<GradeOutput>;
     private call;
     private expectShape;
 }

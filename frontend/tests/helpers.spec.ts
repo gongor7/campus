@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { STATUS_LABELS, statusClass, formatHours, formatBytes } from '../src/helpers';
+import { STATUS_LABELS, statusClass, formatHours, formatBytes, formatCooldown, ENROLLMENT_LABELS } from '../src/helpers';
 
 describe('helpers', () => {
   it('mapea estados del curso a etiquetas y clases visuales', () => {
@@ -14,6 +14,18 @@ describe('helpers', () => {
     expect(formatHours(45)).toBe('45 min');
     expect(formatHours(120)).toBe('2 h');
     expect(formatHours(135)).toBe('2 h 15 min');
+  });
+
+  it('formatea el enfriamiento entre intentos (RF-24)', () => {
+    expect(formatCooldown(0)).toBe('disponible');
+    expect(formatCooldown(45000)).toBe('45 s');
+    expect(formatCooldown(60000)).toBe('1 min 00 s');
+    expect(formatCooldown(595000)).toBe('9 min 55 s');
+  });
+
+  it('etiqueta el estado de inscripcion del estudiante', () => {
+    expect(ENROLLMENT_LABELS.IN_PROGRESS).toBe('En curso');
+    expect(ENROLLMENT_LABELS.COMPLETED).toBe('Completado');
   });
 
   it('formatea tamaños de archivo', () => {

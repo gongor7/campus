@@ -54,6 +54,49 @@ let GeminiProvider = GeminiProvider_1 = class GeminiProvider {
         const parsed = await this.call(prompt, input.sources);
         return this.expectShape(parsed, ['objective', 'content', 'sourceRefs'], 'generateLessonContent');
     }
+    async generateQuestionBank(input) {
+        const prompt = 'Eres un disenador de evaluaciones institucionales. Genera un banco de preguntas de CASO con RESPUESTA ABIERTA.\n' +
+            'REGLAS OBLIGATORIAS:\n' +
+            '- Usa EXCLUSIVAMENTE el contenido del curso y los documentos adjuntos. No inventes normativa ni cifras.\n' +
+            '- Cada pregunta plantea un caso concreto cuyo analisis exige APLICAR conceptos del material: una respuesta generica copiada de otra IA no debe bastar.\n' +
+            '- expectedConcepts enumera los conceptos del material que una buena respuesta debe cubrir (2 a 4).\n' +
+            '- sourceRefs cita el documento o leccion que sustenta la respuesta correcta.\n' +
+            '- variationTemplate define que puede variar del caso entre intentos (entidad, monto, situacion) manteniendo el concepto evaluado.\n' +
+            'Responde SOLO JSON: {"questions":[{"caseText":"","prompt":"","expectedConcepts":[""],"sourceRefs":[""],"variationTemplate":{"variableAspects":[""],"constraints":""}}]}\n' +
+            `Genera entre 5 y 8 preguntas.\n\nCURSO:\n${JSON.stringify(input.course, null, 2)}\n\n` +
+            `LECCIONES:\n${JSON.stringify(input.lessons.map((l) => ({ title: l.title, content: (l.content ?? '').slice(0, 2000), sourceRefs: l.sourceRefs })), null, 2)}`;
+        const parsed = await this.call(prompt, input.sources);
+        const shaped = this.expectShape(parsed, ['questions'], 'generateQuestionBank');
+        if (!Array.isArray(shaped.questions) || shaped.questions.length === 0) {
+            throw new common_1.BadGatewayException('El proveedor Gemini no devolvio preguntas');
+        }
+        return shaped;
+    }
+    async generateVariants(input) {
+        const prompt = 'Transforma cada caso de examen segun su plantilla de variacion, cambiando SOLO los aspectos variables ' +
+            '(entidad, monto, plazo, situacion) y manteniendo identico el concepto evaluado y la dificultad.\n' +
+            'Responde SOLO JSON: {"variants":[{"questionId":0,"caseText":""}]}\n\n' +
+            `PREGUNTAS:\n${JSON.stringify(input.questions, null, 2)}`;
+        const parsed = await this.call(prompt, []);
+        const shaped = this.expectShape(parsed, ['variants'], 'generateVariants');
+        if (shaped.variants.length !== input.questions.length) {
+            throw new common_1.BadGatewayException('El proveedor Gemini no devolvio una variante por pregunta');
+        }
+        return shaped;
+    }
+    async gradeAnswer(input) {
+        const prompt = 'Eres calificador institucional. Evalua la respuesta del estudiante aplicando esta rubrica:\n' +
+            '- Puntaje 0-100 segun cuantos conceptos esperados cubre y la calidad del analisis del caso.\n' +
+            '- Si la respuesta no se sustenta en el material del curso (conceptos genericos sin anclaje institucional), sustained=false y el puntaje no puede superar 50.\n' +
+            '- feedback: conceptos faltantes y la referencia del curso que los desarrolla. Tono formativo que invite a reintentar.\n' +
+            'Responde SOLO JSON: {"score":0,"sustained":true,"feedback":""}\n\n' +
+            `CURSO:\n${JSON.stringify(input.course, null, 2)}\n\nPREGUNTA:\n${JSON.stringify(input.question, null, 2)}\n\nRESPUESTA DEL ESTUDIANTE:\n${input.answer}`;
+        const parsed = await this.call(prompt, []);
+        const graded = this.expectShape(parsed, ['score', 'sustained', 'feedback'], 'gradeAnswer');
+        if (graded.sustained === false && graded.score > 50)
+            graded.score = 50;
+        return graded;
+    }
     async call(prompt, sources) {
         const apiKey = this.config.get('GEMINI_API_KEY');
         if (!apiKey) {

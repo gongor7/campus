@@ -116,7 +116,12 @@ let CoursesService = class CoursesService {
         return saved;
     }
     async archive(id) {
-        const course = await this.findEditable(id);
+        const course = await this.courses.findOne({ where: { id } });
+        if (!course)
+            throw new common_1.NotFoundException('Curso no encontrado');
+        if (course.status === 'ARCHIVED') {
+            throw new common_1.BadRequestException('El curso ya esta archivado');
+        }
         course.status = 'ARCHIVED';
         const saved = await this.courses.save(course);
         await this.audit.log({ action: 'COURSE_ARCHIVED', resourceType: 'COURSE', resourceId: id });

@@ -45,4 +45,53 @@ describe('MockProvider', () => {
     expect(content.content.length).toBeGreaterThan(0);
     expect(content.sourceRefs).toContain('guia.pdf');
   });
+
+  // T7 — banco de preguntas (RF-14, RF-15).
+  it('genera un banco con preguntas de caso, conceptos y plantilla de variacion', async () => {
+    const bank = await provider.generateQuestionBank({
+      course,
+      lessons: [{ title: 'Gestion de riesgos', content: 'contenido', sourceRefs: ['manual.pdf'] }],
+      sources: [{ filename: 'manual.pdf', mimeType: 'application/pdf', base64: '' }],
+    });
+    expect(bank.questions.length).toBeGreaterThanOrEqual(5);
+    for (const q of bank.questions) {
+      expect(q.caseText.length).toBeGreaterThan(20);
+      expect(q.prompt.length).toBeGreaterThan(10);
+      expect(q.expectedConcepts.length).toBeGreaterThanOrEqual(2);
+      expect(q.variationTemplate.variableAspects.length).toBeGreaterThan(0);
+    }
+  });
+
+  // T12 — variantes (RF-19) y calificador determinista (RF-21 a RF-23).
+  it('genera variantes distintas por semilla para la misma pregunta', async () => {
+    const base = { id: 1, caseText: 'Caso base', prompt: 'Analiza', variationTemplate: { variableAspects: ['entidad'], constraints: 'igual' } };
+    const v1 = await provider.generateVariants({ seed: 'aaaaaaaa-1111', questions: [base] });
+    const v2 = await provider.generateVariants({ seed: 'bbbbbbbb-2222', questions: [base] });
+    expect(v1.variants[0].caseText).not.toBe(v2.variants[0].caseText);
+    expect(v1.variants[0].caseText).toContain('Caso base');
+  });
+
+  it('califica: vacia en 0, todos los conceptos en 100, sin sustento por debajo de 50', async () => {
+    const question = { variantCase: 'Caso', prompt: 'P', expectedConcepts: ['riesgo', 'supervision'], sourceRefs: ['manual.pdf'] };
+    const ctx = { course } as never;
+
+    const vacia = await provider.gradeAnswer({ course: ctx as never, question, answer: '   ' });
+    expect(vacia.score).toBe(0);
+
+    const completa = await provider.gradeAnswer({ course: ctx as never, question, answer: 'Aplico el riesgo y la supervision del manual.' });
+    expect(completa.score).toBe(100);
+    expect(completa.sustained).toBe(true);
+
+    const generica = await provider.gradeAnswer({ course: ctx as never, question, answer: 'Respuesta correcta pero [GENERICA]' });
+    expect(generica.score).toBeLessThanOrEqual(50);
+    expect(generica.sustained).toBe(false);
+    expect(generica.feedback).toContain('material del curso');
+  });
+
+  it('el disparador de fallo del proveedor lanza error (RF-25)', async () => {
+    const question = { variantCase: 'Caso', prompt: 'P', expectedConcepts: ['x'], sourceRefs: ['a.pdf'] };
+    await expect(
+      provider.gradeAnswer({ course: {} as never, question, answer: 'mi respuesta [FALLA_PROVEEDOR]' }),
+    ).rejects.toThrow('proveedor');
+  });
 });

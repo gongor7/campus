@@ -13,12 +13,14 @@ const course_entity_1 = require("../courses/course.entity");
 const publication_service_1 = require("./publication.service");
 const publication_controller_1 = require("./publication.controller");
 const audit_module_1 = require("../audit/audit.module");
+const question_banks_module_1 = require("../question-banks/question-banks.module");
+const sources_module_1 = require("../sources/sources.module");
 let PublicationModule = class PublicationModule {
 };
 exports.PublicationModule = PublicationModule;
 exports.PublicationModule = PublicationModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([course_entity_1.CourseEntity]), audit_module_1.AuditModule],
+        imports: [typeorm_1.TypeOrmModule.forFeature([course_entity_1.CourseEntity]), audit_module_1.AuditModule, question_banks_module_1.QuestionBanksModule, sources_module_1.SourcesModule],
         providers: [publication_service_1.PublicationService],
         controllers: [publication_controller_1.PublicationController],
     })

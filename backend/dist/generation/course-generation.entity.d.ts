@@ -1,4 +1,4 @@
-export type GenerationPhase = 'OUTLINE' | 'LESSON';
+export type GenerationPhase = 'OUTLINE' | 'LESSON' | 'QUESTIONS' | 'GRADING';
 export type GenerationStatus = 'SUCCESS' | 'ERROR';
 export declare class CourseGenerationEntity {
     id: number;

@@ -9,6 +9,9 @@ import { CoursesModule } from './courses/courses.module';
 import { GenerationModule } from './generation/generation.module';
 import { PublicationModule } from './publication/publication.module';
 import { StudentsModule } from './students/students.module';
+import { EnrollmentsModule } from './enrollments/enrollments.module';
+import { QuestionBanksModule } from './question-banks/question-banks.module';
+import { AttemptsModule } from './attempts/attempts.module';
 
 @Module({
   imports: [
@@ -49,6 +52,9 @@ import { StudentsModule } from './students/students.module';
     GenerationModule,
     PublicationModule,
     StudentsModule,
+    EnrollmentsModule,
+    QuestionBanksModule,
+    AttemptsModule,
   ],
 })
 export class AppModule {}

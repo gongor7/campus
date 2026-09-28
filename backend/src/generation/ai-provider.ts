@@ -43,6 +43,41 @@ export interface LessonContent {
   sourceRefs: string[];
 }
 
+export interface QuestionDraft {
+  caseText: string;
+  prompt: string;
+  expectedConcepts: string[];
+  sourceRefs: string[];
+  variationTemplate: { variableAspects: string[]; constraints: string };
+}
+
+export interface BankInput {
+  course: CourseContext;
+  lessons: { title: string; content: string | null; sourceRefs: string[] | null }[];
+  sources: StoredFile[];
+}
+
+export interface VariantInput {
+  seed: string;
+  questions: { id: number; caseText: string; prompt: string; variationTemplate: { variableAspects: string[]; constraints: string } }[];
+}
+
+export interface VariantOutput {
+  variants: { questionId: number; caseText: string }[];
+}
+
+export interface GradeInput {
+  course: CourseContext;
+  question: { variantCase: string; prompt: string; expectedConcepts: string[]; sourceRefs: string[] };
+  answer: string;
+}
+
+export interface GradeOutput {
+  score: number;
+  sustained: boolean;
+  feedback: string;
+}
+
 /**
  * Abstraccion del proveedor de IA (SPEC-ai-generation). El dominio depende
  * solo de esta interfaz; Gemini, NotebookLM u otro proveedor se implementan
@@ -53,4 +88,7 @@ export interface AIProvider {
   readonly model: string;
   generateOutline(input: OutlineInput): Promise<OutlineProposal>;
   generateLessonContent(input: LessonInput): Promise<LessonContent>;
+  generateQuestionBank(input: BankInput): Promise<{ questions: QuestionDraft[] }>;
+  generateVariants(input: VariantInput): Promise<VariantOutput>;
+  gradeAnswer(input: GradeInput): Promise<GradeOutput>;
 }

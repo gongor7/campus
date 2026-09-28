@@ -80,10 +80,29 @@ export interface AuditRow {
   createdAt: string;
 }
 
+export interface StudentSession {
+  id: string;
+  name: string;
+  email: string;
+}
+
+export function getStudentSession(): StudentSession | null {
+  const raw = localStorage.getItem('campus-asfi-student');
+  return raw ? (JSON.parse(raw) as StudentSession) : null;
+}
+
+export function setStudentSession(session: StudentSession | null): void {
+  if (session) localStorage.setItem('campus-asfi-student', JSON.stringify(session));
+  else localStorage.removeItem('campus-asfi-student');
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  const session = getStudentSession();
+  if (session) headers['x-student-id'] = session.id;
   const res = await fetch(`/api${path}`, {
-    headers: init?.body instanceof FormData ? undefined : { 'Content-Type': 'application/json' },
     ...init,
+    headers: init?.body instanceof FormData ? undefined : headers,
   });
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
@@ -135,4 +154,94 @@ export const api = {
     const qs = params.toString();
     return request<AuditRow[]>(`/audit${qs ? `?${qs}` : ''}`);
   },
+};
+
+// --- Estudiante ---
+
+export interface StudentEnrollment {
+  enrollmentId: number;
+  courseId: number;
+  title: string;
+  level: CourseLevel;
+  courseStatus: CourseStatus;
+  status: 'IN_PROGRESS' | 'COMPLETED';
+  bestScore: number | null;
+  evaluationApproved: boolean;
+  completedLessons: number;
+  totalLessons: number;
+  percent: number;
+}
+
+export interface AttemptQuestionView {
+  questionId: number;
+  prompt: string;
+  variantCase: string;
+  answer: string | null;
+  score: number | null;
+  feedback: string | null;
+}
+
+export interface AttemptView {
+  id: string;
+  courseId: number;
+  status: 'PREPARING' | 'IN_PROGRESS' | 'GRADING' | 'GRADED' | 'GRADING_FAILED';
+  score: number | null;
+  passScore: number;
+  questions: AttemptQuestionView[];
+}
+
+export interface QuestionBankQuestion {
+  id: number;
+  caseText: string;
+  prompt: string;
+  expectedConcepts: string[];
+  sourceRefs: string[];
+}
+
+export interface QuestionBank {
+  id: number;
+  courseId: number;
+  status: 'DRAFT' | 'APPROVED';
+  questions: QuestionBankQuestion[];
+}
+
+export const studentApi = {
+  session: (name: string, email: string) =>
+    request<StudentSession>('/students/session', { method: 'POST', body: JSON.stringify({ name, email }) }),
+  catalog: () => request<Course[]>('/students/courses'),
+  enroll: (courseId: number) =>
+    request<unknown>(`/students/courses/${courseId}/enroll`, { method: 'POST' }),
+  myCourses: () => request<StudentEnrollment[]>('/students/me/courses'),
+  course: (courseId: number) =>
+    request<{
+      course: Course;
+      enrollment: { id: number; status: string; bestScore: number | null; evaluationApproved: boolean } | null;
+      progress: { completed: number; total: number; percent: number };
+      markedLessonIds: number[];
+    }>(`/students/me/courses/${courseId}`),
+  setProgress: (lessonId: number, completed: boolean) =>
+    request<{ completed: number; total: number; percent: number }>(`/students/me/lessons/${lessonId}/progress`, {
+      method: 'PUT',
+      body: JSON.stringify({ completed }),
+    }),
+  startAttempt: (courseId: number) =>
+    request<AttemptView>(`/students/me/courses/${courseId}/attempts`, { method: 'POST' }),
+  submitAttempt: (attemptId: string, answers: { questionId: number; answer: string }[]) =>
+    request<AttemptView>(`/students/me/attempts/${attemptId}/submit`, {
+      method: 'POST',
+      body: JSON.stringify({ answers }),
+    }),
+  attemptHistory: (courseId: number) =>
+    request<{ id: string; submittedAt: string; score: number; approved: boolean }[]>(`/students/me/courses/${courseId}/attempts`),
+};
+
+export const bankApi = {
+  findByCourse: (courseId: number) => request<QuestionBank>(`/courses/${courseId}/questions`),
+  generate: (courseId: number) => request<QuestionBank>(`/courses/${courseId}/questions/generate`, { method: 'POST' }),
+  approve: (courseId: number) => request<QuestionBank>(`/courses/${courseId}/questions/approve`, { method: 'POST' }),
+  add: (courseId: number, data: { caseText: string; prompt: string; expectedConcepts: string[]; sourceRefs: string[] }) =>
+    request<QuestionBankQuestion>(`/courses/${courseId}/questions`, { method: 'POST', body: JSON.stringify(data) }),
+  update: (questionId: number, data: Partial<{ caseText: string; prompt: string; expectedConcepts: string[] }>) =>
+    request<QuestionBankQuestion>(`/courses/questions/${questionId}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  remove: (questionId: number) => request<void>(`/courses/questions/${questionId}`, { method: 'DELETE' }),
 };

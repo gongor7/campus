@@ -18,10 +18,14 @@ const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const course_entity_1 = require("../courses/course.entity");
 const audit_service_1 = require("../audit/audit.service");
+const question_banks_service_1 = require("../question-banks/question-banks.service");
+const sources_service_1 = require("../sources/sources.service");
 let PublicationService = class PublicationService {
-    constructor(courses, audit) {
+    constructor(courses, audit, banks, sources) {
         this.courses = courses;
         this.audit = audit;
+        this.banks = banks;
+        this.sources = sources;
     }
     async submitReview(courseId) {
         const course = await this.load(courseId);
@@ -39,9 +43,21 @@ let PublicationService = class PublicationService {
             throw new common_1.BadRequestException(`No se puede publicar desde el estado ${course.status}: el curso debe estar en revision (aprobacion docente previa)`);
         }
         const problems = this.completenessProblems(course);
-        if (problems.length > 0) {
-            throw new common_1.BadRequestException(problems);
+        const approvedQuestions = await this.banks.approvedBankWithQuestions(courseId);
+        if (approvedQuestions.length === 0) {
+            problems.push('Falta el banco de preguntas aprobado: generelo, reviselo y aprobelo antes de publicar (RF-18).');
         }
+        if (!course.sourceSetId) {
+            problems.push('El curso necesita un cuaderno de fuentes con al menos una fuente para publicarse.');
+        }
+        else {
+            const set = await this.sources.findSet(course.sourceSetId);
+            if (set.sources.length === 0) {
+                problems.push('El cuaderno del curso no tiene fuentes cargadas; agregue al menos una.');
+            }
+        }
+        if (problems.length > 0)
+            throw new common_1.BadRequestException(problems);
         course.status = 'PUBLISHED';
         const saved = await this.courses.save(course);
         await this.audit.log({ action: 'COURSE_PUBLISHED', resourceType: 'COURSE', resourceId: courseId });
@@ -87,5 +103,7 @@ exports.PublicationService = PublicationService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(course_entity_1.CourseEntity)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
-        audit_service_1.AuditService])
+        audit_service_1.AuditService,
+        question_banks_service_1.QuestionBanksService,
+        sources_service_1.SourcesService])
 ], PublicationService);

@@ -133,7 +133,7 @@ describe('Campus ASFI - flujo completo (e2e)', () => {
     expect(JSON.stringify(res.body.message)).toContain('contenido');
   });
 
-  it('completar el contenido de todas las lecciones y secciones permite publicar', async () => {
+  it('completar contenido, generar y aprobar el banco permite publicar', async () => {
     const course = await request(app.getHttpServer()).get(`/api/courses/${courseId}`).expect(200);
     for (const module of course.body.modules) {
       for (const lesson of module.lessons) {
@@ -142,6 +142,18 @@ describe('Campus ASFI - flujo completo (e2e)', () => {
           .expect(201);
       }
     }
+
+    // RF-18: publicar exige banco aprobado (enmienda SPEC-publication).
+    await request(app.getHttpServer())
+      .post(`/api/courses/${courseId}/publish`)
+      .expect(400);
+
+    await request(app.getHttpServer())
+      .post(`/api/courses/${courseId}/questions/generate`)
+      .expect(201);
+    await request(app.getHttpServer())
+      .post(`/api/courses/${courseId}/questions/approve`)
+      .expect(201);
 
     const published = await request(app.getHttpServer())
       .post(`/api/courses/${courseId}/publish`)

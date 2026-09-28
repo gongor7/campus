@@ -15,6 +15,7 @@ const generation_service_1 = require("./generation.service");
 const generation_controller_1 = require("./generation.controller");
 const mock_provider_1 = require("./mock.provider");
 const gemini_provider_1 = require("./gemini.provider");
+const ai_provider_service_1 = require("./ai-provider.service");
 const courses_module_1 = require("../courses/courses.module");
 const sources_module_1 = require("../sources/sources.module");
 const templates_module_1 = require("../templates/templates.module");
@@ -31,7 +32,8 @@ exports.GenerationModule = GenerationModule = __decorate([
             templates_module_1.TemplatesModule,
             audit_module_1.AuditModule,
         ],
-        providers: [generation_service_1.GenerationService, mock_provider_1.MockProvider, gemini_provider_1.GeminiProvider],
+        providers: [generation_service_1.GenerationService, mock_provider_1.MockProvider, gemini_provider_1.GeminiProvider, ai_provider_service_1.AiProviderService],
         controllers: [generation_controller_1.GenerationController],
+        exports: [ai_provider_service_1.AiProviderService],
     })
 ], GenerationModule);
