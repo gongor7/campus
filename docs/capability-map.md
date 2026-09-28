@@ -28,6 +28,7 @@ Fuente: docs/context/PROMPT-MAESTRO.md (secciones 22-23).
 | publication | Flujo de revisión, aprobación y publicación (transiciones de estado) | courses, audit |
 | ui | Design system institucional y vistas del flujo completo | todos (consume API) |
 | auth | Usuarios, roles (ADMIN/TEACHER), sesiones | foundation (se construye diferido, ver D3) |
+| student-view | Consumo del curso por estudiantes, progreso, evaluacion razonada con IA | courses, ai-generation, audit |
 
 ## Orden de construcción
 

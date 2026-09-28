@@ -55,3 +55,11 @@ course_sections                    -- INTRODUCTION / PRACTICE / EVALUATION / CLO
 1. Un curso creado con outline y lecciones editadas se recupera completo y consistente vía GET.
 2. Ninguna mutación fuera de estado permitida tiene efecto (400 con mensaje claro).
 3. Cada mutación deja su registro de auditoría.
+
+## Enmienda (2026-09-28, SPEC-student-view)
+
+ARCHIVED deja de significar inaccesible para estudiantes inscritos: el curso se retira del
+catalogo publico pero los inscritos pueden terminarlo y revisarlo desde "Mis cursos"
+(SPEC-student-view RF-29). El curso sigue siendo de solo lectura para el docente.
+Publicar exige, ademas, cuaderno con al menos una fuente y banco de preguntas aprobado
+(definidos en SPEC-student-view RF-18; el modulo publication los hara cumplir).
