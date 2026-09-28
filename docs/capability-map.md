@@ -13,6 +13,7 @@ Fuente: docs/context/PROMPT-MAESTRO.md (secciones 22-23).
 | D4 | Frontend Vue 3 + TypeScript (justificado por continuidad del equipo y tipos compartidos con NestJS). |
 | D5 | Infraestructura reutilizada: PostgreSQL en Supabase y deploy en Vercel (ya validadas en la fase anterior del repo). |
 | D6 | Sin vinculación a NotebookLM en el MVP: no existe API pública y un notebookId sin lectura no aporta valor. Los cuadernos de fuentes viven en el Campus. Una integración real (NotebookLMProvider) se evalúa mediante spec futura si Google habilita API Enterprise. |
+| D8 | Vista del estudiante con evaluacion razonada (libro abierto, respuestas abiertas calificadas por IA con rubrica institucional, intentos ilimitados con enfriamiento y plantillas de variacion aprobadas por el docente). Ver SPEC-student-view. |
 | D7 | Generación en dos fases: (A) propuesta de estructura (módulos, lecciones, minutos, fuentes por módulo, brechas de cobertura) que el docente edita; (B) generación de contenido lección por lección con solo las fuentes asignadas. Parámetros del curso: nombre, descripción, objetivo, público, nivel, duración objetivo (horas) y cuaderno. La duración se reparte en minutos por lección y el total debe acercarse al objetivo. |
 
 ## Módulos
