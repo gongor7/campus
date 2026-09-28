@@ -6,9 +6,10 @@ en develop, deploy solo bajo confirmación explícita.
 
 ## Bloque A — students (identidad)
 
-- [ ] T1. Entidad students + validadores de identidad (nombre >= 2 caracteres, formato de correo)
+- [x] T1. Entidad students + validadores de identidad (nombre >= 2 caracteres, formato de correo)
   - RF: RF-01, RF-04
   - Hecho cuando: `npm run test` incluye el validador con casos válidos e inválidos en verde.
+    Verificado 2026-09-28: 7 casos del validador en verde; suite completa 14 unitarios + 14 e2e.
 - [ ] T2. Servicio y endpoint de sesión: ingreso/recuperación por correo; correo existente conserva el nombre original
   - RF: RF-02, RF-03
   - Hecho cuando: e2e registra un estudiante, reingresa con otro nombre y recupera su registro con el nombre original.

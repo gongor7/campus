@@ -17,6 +17,7 @@ const sources_module_1 = require("./sources/sources.module");
 const courses_module_1 = require("./courses/courses.module");
 const generation_module_1 = require("./generation/generation.module");
 const publication_module_1 = require("./publication/publication.module");
+const students_module_1 = require("./students/students.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -55,6 +56,7 @@ exports.AppModule = AppModule = __decorate([
             courses_module_1.CoursesModule,
             generation_module_1.GenerationModule,
             publication_module_1.PublicationModule,
+            students_module_1.StudentsModule,
         ],
     })
 ], AppModule);

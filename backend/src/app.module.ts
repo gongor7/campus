@@ -8,6 +8,7 @@ import { SourcesModule } from './sources/sources.module';
 import { CoursesModule } from './courses/courses.module';
 import { GenerationModule } from './generation/generation.module';
 import { PublicationModule } from './publication/publication.module';
+import { StudentsModule } from './students/students.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { PublicationModule } from './publication/publication.module';
     CoursesModule,
     GenerationModule,
     PublicationModule,
+    StudentsModule,
   ],
 })
 export class AppModule {}
