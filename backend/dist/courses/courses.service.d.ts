@@ -1,0 +1,31 @@
+import { Repository } from 'typeorm';
+import { CourseEntity } from './course.entity';
+import { CourseModuleEntity } from './course-module.entity';
+import { LessonEntity } from './lesson.entity';
+import { CourseSectionEntity } from './course-section.entity';
+import { CreateCourseDto, ReplaceOutlineDto, UpdateCourseDto, UpdateLessonDto, UpdateSectionDto } from './dto';
+import { AuditService } from '../audit/audit.service';
+import { TemplatesService } from '../templates/templates.service';
+import { TemplateValidatorService } from '../templates/template-validator.service';
+export declare class CoursesService {
+    private readonly courses;
+    private readonly modules;
+    private readonly lessons;
+    private readonly sectionsRepo;
+    private readonly audit;
+    private readonly templates;
+    private readonly validator;
+    constructor(courses: Repository<CourseEntity>, modules: Repository<CourseModuleEntity>, lessons: Repository<LessonEntity>, sectionsRepo: Repository<CourseSectionEntity>, audit: AuditService, templates: TemplatesService, validator: TemplateValidatorService);
+    create(dto: CreateCourseDto): Promise<CourseEntity>;
+    findAll(): Promise<CourseEntity[]>;
+    findById(id: number): Promise<CourseEntity>;
+    update(id: number, dto: UpdateCourseDto): Promise<CourseEntity>;
+    replaceOutline(id: number, dto: ReplaceOutlineDto): Promise<CourseEntity>;
+    updateLesson(lessonId: number, dto: UpdateLessonDto): Promise<LessonEntity>;
+    updateSection(sectionId: number, dto: UpdateSectionDto): Promise<CourseSectionEntity>;
+    archive(id: number): Promise<CourseEntity>;
+    private insertModule;
+    private findEditable;
+    private defaultTemplate;
+    private sortTree;
+}
