@@ -34,7 +34,7 @@ onMounted(load);
   <p v-if="error" class="alert-error">{{ error }}</p>
   <p v-if="rows.length === 0 && !error" class="empty">Sin registros para el filtro seleccionado.</p>
 
-  <table v-if="rows.length > 0" class="data">
+  <div v-if="rows.length > 0" class="table-scroll"><table class="data">
     <thead>
       <tr>
         <th>Fecha</th>
@@ -56,4 +56,5 @@ onMounted(load);
       </tr>
     </tbody>
   </table>
+  </div>
 </template>

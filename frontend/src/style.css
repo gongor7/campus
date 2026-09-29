@@ -145,8 +145,65 @@ table.data tr:last-child td { border-bottom: none; }
 .muted { color: var(--muted); }
 .empty { text-align: center; color: var(--muted); padding: 40px 0; }
 
-@media (max-width: 900px) {
-  .cards { grid-template-columns: 1fr 1fr; }
-  .editor { grid-template-columns: 1fr; }
-  .grid-2 { grid-template-columns: 1fr; }
+/* --- Responsive --- */
+
+.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.table-scroll table.data { min-width: 520px; }
+
+@media (max-width: 1024px) {
+  .cards { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 720px) {
+  .container { padding: 14px 12px 60px; }
+
+  /* Barra superior: la marca arriba, la navegacion debajo con scroll horizontal */
+  .topbar { flex-wrap: wrap; padding: 10px 12px; gap: 8px 10px; }
+  .topbar .brand { flex: 1; min-width: 0; }
+  .topbar .brand img { width: 32px; height: 32px; }
+  .topbar .brand .name { font-size: 15px; }
+  .topbar .brand .sub { display: none; }
+  .topbar nav { order: 3; margin-left: 0; width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .topbar nav::-webkit-scrollbar { display: none; }
+  .topbar nav a { padding: 7px 10px; font-size: 13px; white-space: nowrap; }
+  .topbar .session { font-size: 12px; }
+
+  .page-head { flex-direction: column; align-items: stretch; gap: 12px; }
+  .page-head h1 { font-size: 20px; }
+  .page-head .btn { width: 100%; justify-content: center; }
+
+  .cards { grid-template-columns: 1fr; }
+  .grid-2 { grid-template-columns: 1fr; gap: 0; }
+  .card, .card-link, .form-card, .module { border-radius: 10px; }
+
+  /* Inputs a 16px evita el zoom automatico de iOS Safari */
+  .field input, .field select, .field textarea, .editor-main textarea {
+    font-size: 16px;
+  }
+
+  .form-actions { flex-wrap: wrap; }
+  .form-actions .btn { flex: 1 1 auto; justify-content: center; }
+
+  .steps { gap: 6px; }
+  .step { font-size: 11px; padding: 8px 2px; }
+
+  .summary-bar { gap: 8px 16px; padding: 12px 14px; }
+  .summary-bar .stat b { font-size: 16px; }
+  .summary-bar .btn { width: 100%; justify-content: center; }
+
+  .statusbar { flex-wrap: wrap; }
+  .statusbar .st { width: 100%; }
+
+  .module-head { flex-wrap: wrap; gap: 6px 10px; }
+  .lesson-row { flex-wrap: wrap; }
+  .lesson-row .srcs { width: 100%; justify-content: flex-start; }
+
+  .editor { grid-template-columns: 1fr; gap: 12px; }
+  .tree { position: static; }
+
+  .opt-card { gap: 10px; padding: 12px; }
+
+  .doc-row { flex-wrap: wrap; }
+
+  .alert-gaps, .alert-info, .alert-error { font-size: 13.5px; }
 }
