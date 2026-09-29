@@ -13,8 +13,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // x-vercel-original-path cuando hay reescritura: lo restauramos para que
   // Express enrute correctamente.
   const original = req.headers['x-vercel-original-path'];
-  if (original && req.url && !req.url.startsWith(original)) {
-    req.url = original as string;
+  const originalPath = Array.isArray(original) ? original[0] : original;
+  if (originalPath && req.url && !req.url.startsWith(originalPath)) {
+    req.url = originalPath;
   }
   cached.getHttpAdapter().getInstance()(req, res);
 }
