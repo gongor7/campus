@@ -22,7 +22,9 @@ let GeminiProvider = GeminiProvider_1 = class GeminiProvider {
         this.name = 'gemini';
     }
     get model() {
-        return this.config.get('GEMINI_MODEL', 'gemini-2.5-flash');
+        return (this.settings.snapshot().geminiModel ??
+            this.config.get('GEMINI_MODEL') ??
+            'gemini-flash-latest');
     }
     async generateOutline(input) {
         const prompt = 'Eres un disenador instruccional institucional. Propone la estructura de un curso de formacion.\n' +

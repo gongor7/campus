@@ -3,6 +3,7 @@ import { Repository } from 'typeorm';
 import { AppSettingEntity } from './app-setting.entity';
 export interface AiSettingsSnapshot {
     geminiApiKey: string | null;
+    geminiModel: string | null;
     forceMock: boolean;
 }
 export declare class SettingsService implements OnModuleInit {

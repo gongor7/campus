@@ -5,6 +5,7 @@ import { AppSettingEntity } from './app-setting.entity';
 
 export interface AiSettingsSnapshot {
   geminiApiKey: string | null;
+  geminiModel: string | null;
   forceMock: boolean;
 }
 
@@ -53,6 +54,7 @@ export class SettingsService implements OnModuleInit {
   snapshot(): AiSettingsSnapshot {
     return {
       geminiApiKey: this.cache.get('GEMINI_API_KEY') ?? null,
+      geminiModel: this.cache.get('GEMINI_MODEL') ?? null,
       forceMock: (this.cache.get('AI_FORCE_MOCK') ?? 'false') === 'true',
     };
   }
@@ -60,6 +62,7 @@ export class SettingsService implements OnModuleInit {
   async aiSnapshot(): Promise<AiSettingsSnapshot> {
     return {
       geminiApiKey: await this.get('GEMINI_API_KEY'),
+      geminiModel: await this.get('GEMINI_MODEL'),
       forceMock: (await this.get('AI_FORCE_MOCK')) === 'true',
     };
   }

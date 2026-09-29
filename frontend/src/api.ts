@@ -249,11 +249,12 @@ export const bankApi = {
 // --- Configuracion (pestana Configuracion) ---
 
 export const settings = {
-  status: () => request<{ provider: string; model: string; geminiConfigured: boolean; maskedKey: string | null; forceMock: boolean }>('/settings/ai'),
-  update: (data: { geminiApiKey?: string | null; forceMock?: boolean }) =>
-    request<{ provider: string; model: string; geminiConfigured: boolean; maskedKey: string | null; forceMock: boolean }>('/settings/ai', {
+  status: () => request<{ provider: string; model: string; modelSource: string; geminiConfigured: boolean; maskedKey: string | null; forceMock: boolean }>('/settings/ai'),
+  update: (data: { geminiApiKey?: string | null; geminiModel?: string | null; forceMock?: boolean }) =>
+    request<{ provider: string; model: string; modelSource: string; geminiConfigured: boolean; maskedKey: string | null; forceMock: boolean }>('/settings/ai', {
       method: 'PUT',
       body: JSON.stringify(data),
     }),
+  models: () => request<{ models: string[]; error?: string }>('/settings/ai/models'),
   test: () => request<{ ok: boolean; message: string }>('/settings/ai/test', { method: 'POST' }),
 };

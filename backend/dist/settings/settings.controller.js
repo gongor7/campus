@@ -29,6 +29,12 @@ __decorate([
 ], UpdateAiSettingsDto.prototype, "geminiApiKey", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(100),
+    __metadata("design:type", Object)
+], UpdateAiSettingsDto.prototype, "geminiModel", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
 ], UpdateAiSettingsDto.prototype, "forceMock", void 0);
@@ -44,15 +50,40 @@ let SettingsController = class SettingsController {
         return {
             provider: this.ai.provider.name,
             model: this.ai.provider.model,
+            modelSource: snapshot.geminiModel ? 'configuracion' : 'predeterminado',
             geminiConfigured: Boolean(snapshot.geminiApiKey),
             maskedKey: this.settings.mask(snapshot.geminiApiKey),
             forceMock: snapshot.forceMock,
         };
     }
+    async models() {
+        const snapshot = await this.settings.aiSnapshot();
+        if (!snapshot.geminiApiKey)
+            return { models: [] };
+        try {
+            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${snapshot.geminiApiKey}&pageSize=100`);
+            if (!res.ok)
+                return { models: [], error: `No se pudo listar modelos (HTTP ${res.status})` };
+            const data = (await res.json());
+            const models = (data.models ?? [])
+                .filter((m) => (m.supportedGenerationMethods ?? []).includes('generateContent'))
+                .filter((m) => !/tts|image|transcribe|computer-use|lyria|robotics|banana|clip|deep-research|omni|antigravity|customtools/i.test(m.name))
+                .map((m) => m.name.replace('models/', ''))
+                .sort();
+            return { models };
+        }
+        catch (error) {
+            return { models: [], error: error.message };
+        }
+    }
     async update(dto) {
         if (dto.geminiApiKey !== undefined) {
             const key = dto.geminiApiKey === null || dto.geminiApiKey.trim() === '' ? null : dto.geminiApiKey.trim();
             await this.settings.set('GEMINI_API_KEY', key);
+        }
+        if (dto.geminiModel !== undefined) {
+            const model = dto.geminiModel === null || dto.geminiModel.trim() === '' ? null : dto.geminiModel.trim();
+            await this.settings.set('GEMINI_MODEL', model);
         }
         if (dto.forceMock !== undefined) {
             await this.settings.set('AI_FORCE_MOCK', dto.forceMock ? 'true' : 'false');
@@ -61,7 +92,7 @@ let SettingsController = class SettingsController {
             action: 'SETTINGS_UPDATED',
             resourceType: 'SETTINGS',
             resourceId: 'ai',
-            detail: { geminiKeyChanged: dto.geminiApiKey !== undefined, forceMock: dto.forceMock },
+            detail: { geminiKeyChanged: dto.geminiApiKey !== undefined, geminiModel: dto.geminiModel ?? undefined, forceMock: dto.forceMock },
         });
         return this.status();
     }
@@ -82,6 +113,12 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], SettingsController.prototype, "status", null);
+__decorate([
+    (0, common_1.Get)('ai/models'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], SettingsController.prototype, "models", null);
 __decorate([
     (0, common_1.Put)('ai'),
     __param(0, (0, common_1.Body)()),
