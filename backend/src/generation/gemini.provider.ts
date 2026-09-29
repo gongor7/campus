@@ -171,22 +171,37 @@ export class GeminiProvider implements AIProvider {
     };
 
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent?key=${apiKey}`;
-    let response: Response;
-    try {
-      response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-    } catch (error) {
-      this.logger.error(`Gemini: fallo de red: ${(error as Error).message}`);
-      throw new BadGatewayException('No se pudo contactar al proveedor Gemini');
+
+    // 429/5xx son transitorios frecuentes en el tier gratuito: se reintenta.
+    const TRANSIENT = new Set([429, 500, 502, 503, 504]);
+    const ATTEMPTS = 3;
+    let response: Response | null = null;
+    let lastStatus = 0;
+
+    for (let attempt = 1; attempt <= ATTEMPTS; attempt++) {
+      try {
+        response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        lastStatus = response.status;
+        if (response.ok || !TRANSIENT.has(response.status)) break;
+        this.logger.warn(`Gemini HTTP ${response.status} (intento ${attempt}/${ATTEMPTS}); reintentando`);
+      } catch (error) {
+        this.logger.warn(`Gemini: fallo de red (intento ${attempt}/${ATTEMPTS}): ${(error as Error).message}`);
+        response = null;
+      }
+      if (attempt < ATTEMPTS) await new Promise((r) => setTimeout(r, 2000 * attempt));
     }
 
+    if (!response) {
+      throw new BadGatewayException('No se pudo contactar al proveedor Gemini');
+    }
     if (!response.ok) {
       const detail = await response.text();
-      this.logger.error(`Gemini HTTP ${response.status}: ${detail.slice(0, 500)}`);
-      throw new BadGatewayException(`El proveedor Gemini respondio con error ${response.status}`);
+      this.logger.error(`Gemini HTTP ${lastStatus}: ${detail.slice(0, 500)}`);
+      throw new BadGatewayException(`El proveedor Gemini respondio con error ${lastStatus}`);
     }
 
     const payload = (await response.json()) as {
