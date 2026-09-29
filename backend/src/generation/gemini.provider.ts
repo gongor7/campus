@@ -31,8 +31,17 @@ export class GeminiProvider implements AIProvider {
     private readonly settings: SettingsService,
   ) {}
 
+  /**
+   * Modelo activo: configuracion (pestana) > variable de entorno > alias
+   * estable que siempre apunta al Flash vigente (evita modelos retirados
+   * como gemini-2.5-flash, que devuelve 404 para keys nuevas).
+   */
   get model(): string {
-    return this.config.get<string>('GEMINI_MODEL', 'gemini-2.5-flash');
+    return (
+      this.settings.snapshot().geminiModel ??
+      this.config.get<string>('GEMINI_MODEL') ??
+      'gemini-flash-latest'
+    );
   }
 
   async generateOutline(input: OutlineInput): Promise<OutlineProposal> {

@@ -51,12 +51,14 @@ let SettingsService = SettingsService_1 = class SettingsService {
     snapshot() {
         return {
             geminiApiKey: this.cache.get('GEMINI_API_KEY') ?? null,
+            geminiModel: this.cache.get('GEMINI_MODEL') ?? null,
             forceMock: (this.cache.get('AI_FORCE_MOCK') ?? 'false') === 'true',
         };
     }
     async aiSnapshot() {
         return {
             geminiApiKey: await this.get('GEMINI_API_KEY'),
+            geminiModel: await this.get('GEMINI_MODEL'),
             forceMock: (await this.get('AI_FORCE_MOCK')) === 'true',
         };
     }

@@ -5,6 +5,7 @@ import { settings as api } from '../api';
 interface AiStatus {
   provider: string;
   model: string;
+  modelSource: string;
   geminiConfigured: boolean;
   maskedKey: string | null;
   forceMock: boolean;
@@ -16,9 +17,16 @@ const error = ref<string | null>(null);
 const notice = ref<string | null>(null);
 const busy = ref(false);
 const testResult = ref<{ ok: boolean; message: string } | null>(null);
+const availableModels = ref<string[]>([]);
+const selectedModel = ref('');
 
 async function loadStatus() {
   status.value = await api.status();
+  selectedModel.value = status.value.modelSource === 'configuracion' ? status.value.model : '';
+  if (status.value.geminiConfigured) {
+    const list = await api.models();
+    availableModels.value = list.models;
+  }
 }
 
 onMounted(async () => {
@@ -39,6 +47,24 @@ async function save() {
     });
     apiKey.value = '';
     notice.value = 'API key guardada de forma segura (en la base de datos, nunca en el código).';
+  } catch (e) {
+    error.value = (e as Error).message;
+  } finally {
+    busy.value = false;
+  }
+}
+
+async function saveModel() {
+  busy.value = true;
+  error.value = null;
+  notice.value = null;
+  try {
+    status.value = await api.update({
+      geminiModel: selectedModel.value.trim() === '' ? null : selectedModel.value.trim(),
+    });
+    notice.value = status.value.modelSource === 'configuracion'
+      ? 'Modelo guardado: ' + status.value.model
+      : 'Modelo restablecido al predeterminado: ' + status.value.model;
   } catch (e) {
     error.value = (e as Error).message;
   } finally {
@@ -122,6 +148,21 @@ async function testConnection() {
       <button class="btn btn-primary" :disabled="busy || apiKey.trim().length === 0" @click="save">Guardar key</button>
       <button class="btn btn-ghost" :disabled="busy || !status?.geminiConfigured" @click="clearKey">Eliminar key</button>
       <button class="btn btn-accent" :disabled="busy || !status?.geminiConfigured" @click="testConnection">Probar conexión</button>
+    </div>
+
+    <div class="field" style="margin-top:8px">
+      <label for="model">Modelo de Gemini</label>
+      <select id="model" v-model="selectedModel" :disabled="busy || availableModels.length === 0">
+        <option value="">Predeterminado ({{ status?.modelSource === 'predeterminado' ? status.model : 'gemini-flash-latest' }})</option>
+        <option v-for="m in availableModels" :key="m" :value="m">{{ m }}</option>
+      </select>
+      <span class="hint">
+        Lista real de modelos disponibles para tu key. El predeterminado (gemini-flash-latest) siempre apunta al Flash vigente.
+        Modelo activo: {{ status?.model }}.
+      </span>
+    </div>
+    <div class="form-actions" style="justify-content:flex-start">
+      <button class="btn btn-primary" :disabled="busy || availableModels.length === 0" @click="saveModel">Guardar modelo</button>
     </div>
 
     <div v-if="testResult" class="alert-info" style="margin-top:14px" :style="testResult.ok ? '' : 'background:#fdeeec;border-color:#e5c1bb;color:#8c2f22'">
