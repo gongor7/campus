@@ -245,3 +245,15 @@ export const bankApi = {
     request<QuestionBankQuestion>(`/courses/questions/${questionId}`, { method: 'PATCH', body: JSON.stringify(data) }),
   remove: (questionId: number) => request<void>(`/courses/questions/${questionId}`, { method: 'DELETE' }),
 };
+
+// --- Configuracion (pestana Configuracion) ---
+
+export const settings = {
+  status: () => request<{ provider: string; model: string; geminiConfigured: boolean; maskedKey: string | null; forceMock: boolean }>('/settings/ai'),
+  update: (data: { geminiApiKey?: string | null; forceMock?: boolean }) =>
+    request<{ provider: string; model: string; geminiConfigured: boolean; maskedKey: string | null; forceMock: boolean }>('/settings/ai', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+  test: () => request<{ ok: boolean; message: string }>('/settings/ai/test', { method: 'POST' }),
+};

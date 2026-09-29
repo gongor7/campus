@@ -21,6 +21,7 @@ const students_module_1 = require("./students/students.module");
 const enrollments_module_1 = require("./enrollments/enrollments.module");
 const question_banks_module_1 = require("./question-banks/question-banks.module");
 const attempts_module_1 = require("./attempts/attempts.module");
+const settings_module_1 = require("./settings/settings.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -63,6 +64,7 @@ exports.AppModule = AppModule = __decorate([
             enrollments_module_1.EnrollmentsModule,
             question_banks_module_1.QuestionBanksModule,
             attempts_module_1.AttemptsModule,
+            settings_module_1.SettingsModule,
         ],
     })
 ], AppModule);

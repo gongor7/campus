@@ -11,6 +11,8 @@ import { CoursesModule } from '../courses/courses.module';
 import { SourcesModule } from '../sources/sources.module';
 import { TemplatesModule } from '../templates/templates.module';
 import { AuditModule } from '../audit/audit.module';
+import { SettingsModule } from '../settings/settings.module';
+import { SettingsController } from '../settings/settings.controller';
 
 @Module({
   imports: [
@@ -19,9 +21,10 @@ import { AuditModule } from '../audit/audit.module';
     SourcesModule,
     TemplatesModule,
     AuditModule,
+    SettingsModule,
   ],
   providers: [GenerationService, MockProvider, GeminiProvider, AiProviderService],
-  controllers: [GenerationController],
+  controllers: [GenerationController, SettingsController],
   exports: [AiProviderService],
 })
 export class GenerationModule {}

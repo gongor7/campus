@@ -20,6 +20,8 @@ const courses_module_1 = require("../courses/courses.module");
 const sources_module_1 = require("../sources/sources.module");
 const templates_module_1 = require("../templates/templates.module");
 const audit_module_1 = require("../audit/audit.module");
+const settings_module_1 = require("../settings/settings.module");
+const settings_controller_1 = require("../settings/settings.controller");
 let GenerationModule = class GenerationModule {
 };
 exports.GenerationModule = GenerationModule;
@@ -31,9 +33,10 @@ exports.GenerationModule = GenerationModule = __decorate([
             sources_module_1.SourcesModule,
             templates_module_1.TemplatesModule,
             audit_module_1.AuditModule,
+            settings_module_1.SettingsModule,
         ],
         providers: [generation_service_1.GenerationService, mock_provider_1.MockProvider, gemini_provider_1.GeminiProvider, ai_provider_service_1.AiProviderService],
-        controllers: [generation_controller_1.GenerationController],
+        controllers: [generation_controller_1.GenerationController, settings_controller_1.SettingsController],
         exports: [ai_provider_service_1.AiProviderService],
     })
 ], GenerationModule);

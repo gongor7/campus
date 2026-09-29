@@ -12,10 +12,12 @@ var GeminiProvider_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GeminiProvider = void 0;
 const common_1 = require("@nestjs/common");
+const settings_service_1 = require("../settings/settings.service");
 const config_1 = require("@nestjs/config");
 let GeminiProvider = GeminiProvider_1 = class GeminiProvider {
-    constructor(config) {
+    constructor(config, settings) {
         this.config = config;
+        this.settings = settings;
         this.logger = new common_1.Logger(GeminiProvider_1.name);
         this.name = 'gemini';
     }
@@ -97,10 +99,20 @@ let GeminiProvider = GeminiProvider_1 = class GeminiProvider {
             graded.score = 50;
         return graded;
     }
+    async ping() {
+        const parsed = await this.call('Responde exactamente con la palabra: CONECTADO', []);
+        return typeof parsed === 'object' && parsed !== null
+            ? 'respuesta recibida'
+            : String(parsed).slice(0, 100);
+    }
+    async currentKey() {
+        const fromSettings = await this.settings.get('GEMINI_API_KEY');
+        return fromSettings ?? this.config.get('GEMINI_API_KEY') ?? null;
+    }
     async call(prompt, sources) {
-        const apiKey = this.config.get('GEMINI_API_KEY');
+        const apiKey = await this.currentKey();
         if (!apiKey) {
-            throw new common_1.BadGatewayException('GEMINI_API_KEY no configurada: no se puede generar con el proveedor gemini');
+            throw new common_1.BadGatewayException('Sin API key de Gemini: ingresala en Configuracion (o define GEMINI_API_KEY) para usar la IA real');
         }
         const body = {
             contents: [
@@ -161,5 +173,6 @@ let GeminiProvider = GeminiProvider_1 = class GeminiProvider {
 exports.GeminiProvider = GeminiProvider;
 exports.GeminiProvider = GeminiProvider = GeminiProvider_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [config_1.ConfigService])
+    __metadata("design:paramtypes", [config_1.ConfigService,
+        settings_service_1.SettingsService])
 ], GeminiProvider);

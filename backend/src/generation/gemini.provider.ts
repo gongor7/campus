@@ -1,4 +1,5 @@
 import { BadGatewayException, Injectable, Logger } from '@nestjs/common';
+import { SettingsService } from '../settings/settings.service';
 import { ConfigService } from '@nestjs/config';
 import {
   AIProvider,
@@ -25,7 +26,10 @@ export class GeminiProvider implements AIProvider {
   private readonly logger = new Logger(GeminiProvider.name);
   readonly name = 'gemini';
 
-  constructor(private readonly config: ConfigService) {}
+  constructor(
+    private readonly config: ConfigService,
+    private readonly settings: SettingsService,
+  ) {}
 
   get model(): string {
     return this.config.get<string>('GEMINI_MODEL', 'gemini-2.5-flash');
@@ -120,10 +124,23 @@ export class GeminiProvider implements AIProvider {
     return graded;
   }
 
+  /** Prueba minima de conectividad para la pestana Configuracion. */
+  async ping(): Promise<string> {
+    const parsed = await this.call('Responde exactamente con la palabra: CONECTADO', []);
+    return typeof parsed === 'object' && parsed !== null
+      ? 'respuesta recibida'
+      : String(parsed).slice(0, 100);
+  }
+
+  private async currentKey(): Promise<string | null> {
+    const fromSettings = await this.settings.get('GEMINI_API_KEY');
+    return fromSettings ?? this.config.get<string>('GEMINI_API_KEY') ?? null;
+  }
+
   private async call(prompt: string, sources: { filename: string; mimeType: string; base64: string }[]): Promise<unknown> {
-    const apiKey = this.config.get<string>('GEMINI_API_KEY');
+    const apiKey = await this.currentKey();
     if (!apiKey) {
-      throw new BadGatewayException('GEMINI_API_KEY no configurada: no se puede generar con el proveedor gemini');
+      throw new BadGatewayException('Sin API key de Gemini: ingresala en Configuracion (o define GEMINI_API_KEY) para usar la IA real');
     }
 
     const body = {

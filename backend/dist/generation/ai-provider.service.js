@@ -14,11 +14,22 @@ const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
 const mock_provider_1 = require("./mock.provider");
 const gemini_provider_1 = require("./gemini.provider");
+const settings_service_1 = require("../settings/settings.service");
 let AiProviderService = class AiProviderService {
-    constructor(mock, gemini, config) {
-        const preferred = config.get('AI_PROVIDER', 'gemini');
-        const hasKey = Boolean(config.get('GEMINI_API_KEY'));
-        this.provider = preferred === 'mock' || !hasKey ? mock : gemini;
+    constructor(mock, gemini, settings, config) {
+        this.mock = mock;
+        this.gemini = gemini;
+        this.settings = settings;
+        this.config = config;
+    }
+    get provider() {
+        const snapshot = this.settings.snapshot();
+        const envProvider = process.env.AI_PROVIDER ?? this.config.get('AI_PROVIDER') ?? 'gemini';
+        if (envProvider === 'mock' || snapshot.forceMock)
+            return this.mock;
+        if (snapshot.geminiApiKey || this.config.get('GEMINI_API_KEY'))
+            return this.gemini;
+        return this.mock;
     }
     get name() {
         return this.provider.name;
@@ -30,5 +41,8 @@ let AiProviderService = class AiProviderService {
 exports.AiProviderService = AiProviderService;
 exports.AiProviderService = AiProviderService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [mock_provider_1.MockProvider, gemini_provider_1.GeminiProvider, config_1.ConfigService])
+    __metadata("design:paramtypes", [mock_provider_1.MockProvider,
+        gemini_provider_1.GeminiProvider,
+        settings_service_1.SettingsService,
+        config_1.ConfigService])
 ], AiProviderService);

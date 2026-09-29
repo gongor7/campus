@@ -14,6 +14,7 @@
       <RouterLink to="/">Cursos</RouterLink>
       <RouterLink to="/source-sets">Cuadernos de fuentes</RouterLink>
       <RouterLink to="/audit">Auditoría</RouterLink>
+      <RouterLink to="/configuracion">Configuración</RouterLink>
       <RouterLink to="/estudiante">Campus estudiante</RouterLink>
     </nav>
     <div class="session">Docente</div>

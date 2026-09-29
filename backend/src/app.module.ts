@@ -12,6 +12,7 @@ import { StudentsModule } from './students/students.module';
 import { EnrollmentsModule } from './enrollments/enrollments.module';
 import { QuestionBanksModule } from './question-banks/question-banks.module';
 import { AttemptsModule } from './attempts/attempts.module';
+import { SettingsModule } from './settings/settings.module';
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { AttemptsModule } from './attempts/attempts.module';
     EnrollmentsModule,
     QuestionBanksModule,
     AttemptsModule,
+    SettingsModule,
   ],
 })
 export class AppModule {}
