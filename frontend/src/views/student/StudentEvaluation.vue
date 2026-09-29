@@ -78,7 +78,7 @@ async function submitAttempt() {
   <!-- Historial (RF-23, RF-28) -->
   <div v-if="history.length > 0" class="form-card" style="margin-bottom:18px">
     <h2 style="font-size:15px;color:var(--primary);margin-bottom:10px">Historial de intentos</h2>
-    <table class="data">
+    <div class="table-scroll"><table class="data">
       <thead><tr><th>Fecha</th><th>Puntaje</th><th>Resultado</th></tr></thead>
       <tbody>
         <tr v-for="h in history" :key="h.id">
@@ -88,6 +88,7 @@ async function submitAttempt() {
         </tr>
       </tbody>
     </table>
+    </div>
   </div>
 
   <!-- Preparando (RF-19) -->
